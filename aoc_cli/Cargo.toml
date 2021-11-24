@@ -1,0 +1,15 @@
+[package]
+name = "aoc_cli"
+version = "0.1.0"
+authors = ["Fernando Matsumoto <ferkmatsumoto@gmail.com>"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.48"
+aoc = { path = "../aoc" }
+itertools = "0.10.1"
+rustc-hash = "1.1.0"
+structopt = "0.3.25"
+termcolor = "1.1.2"

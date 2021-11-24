@@ -1,0 +1,18 @@
+[package]
+name = "aoc"
+version = "0.1.0"
+authors = ["Fernando Matsumoto <ferkmatsumoto@gmail.com>"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+linkme = "0.2.7"
+thiserror = "1.0.30"
+rustc-hash = "1.1.0"
+rust-embed = "6.2.0"
+regex = "1.5.4"
+lazy_static = "1.4.0"
+anyhow = "1.0.48"
+
+[features]
