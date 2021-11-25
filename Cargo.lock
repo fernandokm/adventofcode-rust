@@ -10,8 +10,10 @@ dependencies = [
  "aoc",
  "aoc_cli",
  "itertools",
+ "lazy_static",
  "linkme",
  "paste",
+ "regex",
  "rust-embed",
 ]
 
