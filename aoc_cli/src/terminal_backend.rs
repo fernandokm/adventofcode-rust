@@ -6,6 +6,7 @@ use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 #[derive(Debug, Clone, Copy)]
 pub struct TerminalOutputBackend {
     pub color_choice: ColorChoice,
+    pub quiet: bool,
 }
 
 impl TerminalOutputBackend {
@@ -38,9 +39,11 @@ impl aoc::ProblemOutputBackend for TerminalOutputBackend {
         let mut stdout = StandardStream::stdout(self.color_choice);
         stdout.set_color(ColorSpec::new().set_bold(true))?;
 
-        write!(stdout, "Year {}, day {}", spec.id.year, spec.id.day)?;
-        write!(stdout, " ({})", spec.variant)?;
-        writeln!(stdout)?;
+        writeln!(
+            stdout,
+            "Problem {}.{} ({})",
+            spec.id.year, spec.id.day, spec.variant
+        )?;
 
         stdout.reset()?;
         Ok(())
@@ -56,8 +59,12 @@ impl aoc::ProblemOutputBackend for TerminalOutputBackend {
         write!(stdout, "    [part {}] ", part)?;
         self.write_block(&mut stdout, solution)?;
 
-        stdout.set_color(ColorSpec::new().set_dimmed(true))?;
-        writeln!(stdout, "    (finished in {:.1?})", exec_time)?;
+        if self.quiet {
+            writeln!(stdout)?;
+        } else {
+            stdout.set_color(ColorSpec::new().set_dimmed(true))?;
+            writeln!(stdout, "    (finished in {:.1?})", exec_time)?;
+        }
 
         stdout.reset()?;
         Ok(())

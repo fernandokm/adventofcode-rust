@@ -25,6 +25,17 @@ pub struct RunCmd {
         help = "A list of problems to be solved, in the format yyyy[.dd][:variant] (ignored if --all is specified)"
     )]
     problems_filters: Vec<ProblemFilter>,
+
+    #[structopt(
+        short,
+        long,
+        default_value = "auto",
+        help = "Controls colored output (always, auto, never)"
+    )]
+    color: ColorChoice,
+
+    #[structopt(short, long)]
+    quiet: bool,
 }
 
 impl RunCmd {
@@ -64,7 +75,8 @@ impl RunCmd {
             .filter(|spec| spec.id == solver.problem_id)
             .peekable();
         let backend = terminal_backend::TerminalOutputBackend {
-            color_choice: termcolor::ColorChoice::Auto,
+            color_choice: self.color.into(),
+            quiet: self.quiet,
         };
         if input_specs.peek().is_none() {
             backend.error(&format!("No input files found for: {}", solver.problem_id))?;
@@ -144,5 +156,39 @@ impl FromStr for ProblemFilter {
         }
         pf.year = s.parse()?;
         Ok(pf)
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+enum ColorChoice {
+    Always,
+    Auto,
+    Never,
+}
+
+impl FromStr for ColorChoice {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(match s.trim().to_lowercase().as_str() {
+            "always" => Self::Always,
+            "auto" => Self::Auto,
+            "never" => Self::Never,
+            _ => anyhow::bail!(
+                "invalid color option \"{}\" (must be always, auto or never)",
+                s.trim()
+            ),
+        })
+    }
+}
+
+impl From<ColorChoice> for termcolor::ColorChoice {
+    fn from(val: ColorChoice) -> Self {
+        match val {
+            ColorChoice::Always => termcolor::ColorChoice::Always,
+            ColorChoice::Never => termcolor::ColorChoice::Never,
+            ColorChoice::Auto if atty::is(atty::Stream::Stdout) => termcolor::ColorChoice::Auto,
+            ColorChoice::Auto => termcolor::ColorChoice::Never,
+        }
     }
 }
