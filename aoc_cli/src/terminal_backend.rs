@@ -23,10 +23,10 @@ impl TerminalOutputBackend {
         Ok(())
     }
 
-    pub fn error(&self, err: &dyn Display) -> aoc::Result<()> {
+    pub fn error(&self, err: &dyn std::fmt::Debug) -> aoc::Result<()> {
         let mut stdout = StandardStream::stdout(self.color_choice);
         stdout.set_color(ColorSpec::new().set_fg(Some(Color::Red)))?;
-        self.write_block(&mut stdout, err)?;
+        self.write_block(&mut stdout, &format!("{:?}", err))?;
         writeln!(stdout)?;
         Ok(())
     }
