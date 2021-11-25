@@ -92,7 +92,7 @@ impl RunCmd {
             if let Some(i) = variant_pos {
                 target_variants.swap_remove(i);
             }
-            if !all_variants && variant_pos.is_none() {
+            if !self.all && !all_variants && variant_pos.is_none() {
                 continue;
             }
 
