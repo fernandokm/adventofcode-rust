@@ -15,6 +15,7 @@ dependencies = [
  "paste",
  "regex",
  "rust-embed",
+ "rustc-hash",
 ]
 
 [[package]]
