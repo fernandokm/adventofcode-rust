@@ -73,6 +73,7 @@ impl RunCmd {
             .keys()
             .into_iter()
             .filter(|spec| spec.id == solver.problem_id)
+            .sorted_unstable_by(|spec1, spec2| spec1.variant.cmp(&spec2.variant))
             .peekable();
         let backend = terminal_backend::TerminalOutputBackend {
             color_choice: self.color.into(),

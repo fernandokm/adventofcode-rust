@@ -16,30 +16,31 @@ Problem 2020.3 (real)
 Problem 2020.3 (test)
     [part 1] 7
     [part 2] 336
-Problem 2020.4 (test)
-    [part 1] 2
-    [part 2] 2
 Problem 2020.4 (real)
     [part 1] 190
     [part 2] 121
+Problem 2020.4 (test)
+    [part 1] 2
+    [part 2] 2
 Problem 2020.5 (real)
     [part 1] 913
     [part 2] 717
-Problem 2020.6 (test)
-    [part 1] 11
-    [part 2] 6
 Problem 2020.6 (real)
     [part 1] 6735
     [part 2] 3221
-Problem 2020.7 (test)
-    [part 1] 4
-    [part 2] 32
+Problem 2020.6 (test)
+    [part 1] 11
+    [part 2] 6
 Problem 2020.7 (real)
     [part 1] 378
     [part 2] 27526
-Problem 2020.8 (test)
-    [part 1] 5
-    [part 2] 8
+Problem 2020.7 (test)
+    [part 1] 4
+    [part 2] 32
 Problem 2020.8 (real)
     [part 1] 1867
     [part 2] 1303
+Problem 2020.8 (test)
+    [part 1] 5
+    [part 2] 8
+
