@@ -4,7 +4,8 @@ use rust_embed::RustEmbed;
 #[folder = "inputs"]
 struct EmbeddedInput;
 
-mod year2020;
+pub mod year2020;
+pub mod util;
 
 fn main() -> anyhow::Result<()> {
     let app = aoc_cli::from_args();

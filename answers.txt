@@ -43,4 +43,30 @@ Problem 2020.8 (real)
 Problem 2020.8 (test)
     [part 1] 5
     [part 2] 8
-
+Problem 2020.9 (real)
+    [part 1] 144381670
+    [part 2] 20532569
+Problem 2020.9 (test)
+    [part 1] 127
+    [part 2] 62
+Problem 2020.10 (real)
+    [part 1] 2664
+    [part 2] 148098383347712
+Problem 2020.10 (test1)
+    [part 1] 35
+    [part 2] 8
+Problem 2020.10 (test2)
+    [part 1] 220
+    [part 2] 19208
+Problem 2020.11 (real)
+    [part 1] 2321
+    [part 2] 2102
+Problem 2020.11 (test)
+    [part 1] 37
+    [part 2] 26
+Problem 2020.12 (real)
+    [part 1] 1148
+    [part 2] 52203
+Problem 2020.12 (test)
+    [part 1] 25
+    [part 2] 286
