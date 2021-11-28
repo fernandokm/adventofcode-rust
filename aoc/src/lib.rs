@@ -44,6 +44,8 @@ impl Display for ProblemId {
 pub struct ProblemOutput<'a> {
     inner: Box<dyn ProblemOutputBackend + 'a>,
     last_instant: Instant,
+    part_time: [Vec<Duration>; 2],
+    output_enabled: bool,
 }
 
 impl<'a> ProblemOutput<'a> {
@@ -55,7 +57,45 @@ impl<'a> ProblemOutput<'a> {
         Ok(ProblemOutput {
             inner: Box::new(inner),
             last_instant: Instant::now(),
+            part_time: [Vec::new(), Vec::new()],
+            output_enabled: true,
         })
+    }
+
+    pub fn disable_output(&mut self) {
+        self.output_enabled = false;
+    }
+
+    pub fn enable_output(&mut self) {
+        self.output_enabled = true;
+    }
+
+    fn try_set(&mut self, part: u32, solution: impl Display) -> Result<()> {
+        debug_assert!(part == 1 || part == 2);
+
+        self.part_time[(part - 1) as usize].push(self.last_instant.elapsed());
+        self.reset_elapsed_time();
+        if self.output_enabled {
+            let times = &self.part_time[(part - 1) as usize];
+            let exec_time = times.iter().sum::<Duration>() / times.len() as u32;
+            let exec_time_err = if times.len() == 1 {
+                None
+            } else {
+                let n = times.len() as f64;
+                let sum_sqr_errs = times
+                    .iter()
+                    .map(|&t| {
+                        let err_secs = t.as_secs_f64() - exec_time.as_secs_f64();
+                        err_secs * err_secs
+                    })
+                    .sum::<f64>();
+                let variance = sum_sqr_errs / (n - 1.0);
+                Some(Duration::from_secs_f64(variance.sqrt()))
+            };
+            self.inner
+                .set_solution(part, exec_time, exec_time_err, &solution)?;
+        }
+        Ok(())
     }
 
     pub fn set_part1(&mut self, solution: impl Display) {
@@ -64,10 +104,7 @@ impl<'a> ProblemOutput<'a> {
     }
 
     pub fn try_set_part1(&mut self, solution: impl Display) -> Result<()> {
-        self.inner
-            .set_solution(1, self.last_instant.elapsed(), &solution)?;
-        self.reset_elapsed_time();
-        Ok(())
+        self.try_set(1, solution)
     }
 
     pub fn set_part2(&mut self, solution: impl Display) {
@@ -76,10 +113,7 @@ impl<'a> ProblemOutput<'a> {
     }
 
     pub fn try_set_part2(&mut self, solution: impl Display) -> Result<()> {
-        self.inner
-            .set_solution(2, self.last_instant.elapsed(), &solution)?;
-        self.reset_elapsed_time();
-        Ok(())
+        self.try_set(2, solution)
     }
 
     pub fn reset_elapsed_time(&mut self) {
@@ -93,6 +127,7 @@ pub trait ProblemOutputBackend {
         &mut self,
         part: u32,
         exec_time: Duration,
+        exec_time_err: Option<Duration>,
         solution: &dyn Display,
     ) -> Result<()>;
 }

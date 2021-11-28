@@ -68,7 +68,6 @@ impl RunCmd {
         solver: &Solver,
         default_inputs: &impl aoc::input::Input,
     ) -> anyhow::Result<()> {
-        // TODO: filter input specs according to CLI args
         let mut input_specs = default_inputs
             .keys()
             .into_iter()
@@ -110,10 +109,17 @@ impl RunCmd {
             }
 
             let mut out = aoc::ProblemOutput::start(spec, backend)?;
+            out.disable_output();
             let input = default_inputs.get(spec).unwrap();
 
-            if let Err(e) = solver.solve(&input, &mut out) {
-                backend.error(&e)?;
+            for i in 0..self.repeat {
+                if i == self.repeat - 1 {
+                    out.enable_output();
+                }
+                if let Err(e) = solver.solve(&input, &mut out) {
+                    backend.error(&e)?;
+                    break;
+                }
             }
         }
 

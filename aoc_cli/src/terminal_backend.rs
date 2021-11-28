@@ -53,6 +53,7 @@ impl aoc::ProblemOutputBackend for TerminalOutputBackend {
         &mut self,
         part: u32,
         exec_time: Duration,
+        exec_time_err: Option<Duration>,
         solution: &dyn Display,
     ) -> aoc::Result<()> {
         let mut stdout = StandardStream::stdout(self.color_choice);
@@ -63,7 +64,11 @@ impl aoc::ProblemOutputBackend for TerminalOutputBackend {
             writeln!(stdout)?;
         } else {
             stdout.set_color(ColorSpec::new().set_dimmed(true))?;
-            writeln!(stdout, "    (finished in {:.1?})", exec_time)?;
+            if let Some(err) = exec_time_err {
+                writeln!(stdout, "    (finished in {:.1?} ± {:.1?})", exec_time, err)?;
+            } else {
+                writeln!(stdout, "    (finished in {:.1?})", exec_time)?;
+            }
         }
 
         stdout.reset()?;
