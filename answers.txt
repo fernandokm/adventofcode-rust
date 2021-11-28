@@ -70,3 +70,9 @@ Problem 2020.12 (real)
 Problem 2020.12 (test)
     [part 1] 25
     [part 2] 286
+Problem 2020.13 (real)
+    [part 1] 3606
+    [part 2] 379786358533423
+Problem 2020.13 (test)
+    [part 1] 295
+    [part 2] 1068781
