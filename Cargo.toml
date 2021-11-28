@@ -4,6 +4,9 @@ version = "0.1.0"
 authors = ["Fernando Matsumoto <ferkmatsumoto@gmail.com>"]
 edition = "2021"
 
+[profile.release]
+debug = true
+
 [dependencies]
 aoc = { path = "aoc" }
 aoc_cli = { path = "aoc_cli" }

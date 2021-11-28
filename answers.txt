@@ -76,3 +76,12 @@ Problem 2020.13 (real)
 Problem 2020.13 (test)
     [part 1] 295
     [part 2] 1068781
+Problem 2020.14 (real)
+    [part 1] 11179633149677
+    [part 2] 4822600194774
+Problem 2020.14 (test1)
+    [part 1] 165
+    [part 2] <skipped>
+Problem 2020.14 (test2)
+    [part 1] 51
+    [part 2] 208
