@@ -36,7 +36,7 @@ macro_rules! impl_zero_one_primitive {
         }
         impl One for $typ {
             fn one() -> Self { $one }
-            fn is_one(&self) -> bool { *self == $one }
+            #[allow(clippy::float_cmp)] fn is_one(&self) -> bool { *self == $one }
         }
     };
     (($zero:expr, $one:expr), $typ:ty, $($rest:ty),+) => {
