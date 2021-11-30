@@ -91,3 +91,9 @@ Problem 2020.15 (real)
 Problem 2020.15 (test)
     [part 1] 436
     [part 2] 175594
+Problem 2020.16 (real)
+    [part 1] 26988
+    [part 2] 426362917709
+Problem 2020.16 (test)
+    [part 1] 71
+    [part 2] 1
