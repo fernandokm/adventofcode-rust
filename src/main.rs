@@ -5,6 +5,7 @@ use rust_embed::RustEmbed;
 struct EmbeddedInput;
 
 pub mod year2020;
+pub mod year2021;
 pub mod util;
 
 fn main() -> anyhow::Result<()> {
