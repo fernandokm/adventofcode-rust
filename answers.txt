@@ -97,3 +97,15 @@ Problem 2020.16 (real)
 Problem 2020.16 (test)
     [part 1] 71
     [part 2] 1
+Problem 2021.1 (real)
+    [part 1] 1502
+    [part 2] 1538
+Problem 2021.1 (test)
+    [part 1] 7
+    [part 2] 5
+Problem 2021.2 (real)
+    [part 1] 2322630
+    [part 2] 2105273490
+Problem 2021.2 (test)
+    [part 1] 150
+    [part 2] 900
