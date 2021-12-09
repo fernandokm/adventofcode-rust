@@ -127,3 +127,9 @@ Problem 2021.5 (real)
 Problem 2021.5 (test)
     [part 1] 5
     [part 2] 12
+Problem 2021.6 (real)
+    [part 1] 373378
+    [part 2] 1682576647495
+Problem 2021.6 (test)
+    [part 1] 5934
+    [part 2] 26984457539
