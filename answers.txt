@@ -109,3 +109,15 @@ Problem 2021.2 (real)
 Problem 2021.2 (test)
     [part 1] 150
     [part 2] 900
+Problem 2021.3 (real)
+    [part 1] 1307354
+    [part 2] 482500
+Problem 2021.3 (test)
+    [part 1] 198
+    [part 2] 230
+Problem 2021.4 (real)
+    [part 1] 41503
+    [part 2] 3178
+Problem 2021.4 (test)
+    [part 1] 4512
+    [part 2] 1924
