@@ -12,7 +12,7 @@ pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
     let preamble_len: usize = preamble_len.trim().parse()?;
     let nums: Vec<u64> = nums
         .split_whitespace()
-        .map(|x| FromStr::from_str(x))
+        .map(FromStr::from_str)
         .try_collect()?;
 
     let invalid = nums
