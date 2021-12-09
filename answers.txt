@@ -121,3 +121,9 @@ Problem 2021.4 (real)
 Problem 2021.4 (test)
     [part 1] 4512
     [part 2] 1924
+Problem 2021.5 (real)
+    [part 1] 7674
+    [part 2] 20898
+Problem 2021.5 (test)
+    [part 1] 5
+    [part 2] 12
