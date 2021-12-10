@@ -145,3 +145,9 @@ Problem 2021.8 (real)
 Problem 2021.8 (test)
     [part 1] 26
     [part 2] 61229
+Problem 2021.9 (real)
+    [part 1] 572
+    [part 2] 847044
+Problem 2021.9 (test)
+    [part 1] 15
+    [part 2] 1134
