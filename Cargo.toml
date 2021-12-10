@@ -19,6 +19,7 @@ regex = "1.5.4"
 lazy_static = "1.4.0"
 rustc-hash = "1.1.0"
 ndarray = "0.15.4"
+thiserror = "1.0.30"
 
 [workspace]
 members = [

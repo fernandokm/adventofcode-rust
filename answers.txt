@@ -4,6 +4,9 @@ Problem 2019.1 (real)
 Problem 2019.1 (test)
     [part 1] 34241
     [part 2] 51316
+Problem 2019.2 (real)
+    [part 1] 3166704
+    [part 2] 8018
 Problem 2020.1 (real)
     [part 1] 1007104
     [part 2] 18847752

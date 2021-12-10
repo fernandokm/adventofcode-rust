@@ -17,6 +17,7 @@ dependencies = [
  "regex",
  "rust-embed",
  "rustc-hash",
+ "thiserror",
 ]
 
 [[package]]
