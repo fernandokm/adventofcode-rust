@@ -46,6 +46,9 @@ pub enum Error<Word> {
 
     #[error("intcode error: cannot set readonly parameter (parameter mode: {mode})")]
     ReadonlyParameter { mode: &'static str },
+
+    #[error("intcode error: end of input (no more input available)")]
+    EndOfInput
 }
 
 #[derive(Debug, Clone)]
@@ -53,6 +56,8 @@ pub struct Computer<W: Word> {
     pub ram: FxHashMap<W, W>,
     pub ip: W,
     pub halted: bool,
+    pub input: Vec<W>,
+    pub output: Vec<W>,
 }
 
 impl<W: Word, E> FromStr for Computer<W>
@@ -73,6 +78,8 @@ where
             ram,
             ip: W::from(0),
             halted: false,
+            input: Vec::new(),
+            output: Vec::new(),
         })
     }
 }

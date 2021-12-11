@@ -46,6 +46,8 @@ impl<W: Word> Parameter<W> {
 pub enum Op {
     Add,
     Mul,
+    Input,
+    Output,
     Halt,
 }
 
@@ -54,6 +56,8 @@ impl Op {
         match () {
             _ if opcode == W::from(1) => Ok(Op::Add),
             _ if opcode == W::from(2) => Ok(Op::Mul),
+            _ if opcode == W::from(3) => Ok(Op::Input),
+            _ if opcode == W::from(4) => Ok(Op::Output),
             _ if opcode == W::from(99) => Ok(Op::Halt),
             _ => Err(Error::InvalidOpcode(opcode)),
         }
@@ -62,6 +66,7 @@ impl Op {
     pub fn param_count(self) -> usize {
         match self {
             Op::Add | Op::Mul => 3,
+            Op::Input | Op::Output => 1,
             Op::Halt => 0,
         }
     }
@@ -74,6 +79,11 @@ impl Op {
         match self {
             Op::Add => Self::binary(comp, params, |x, y| x + y)?,
             Op::Mul => Self::binary(comp, params, |x, y| x * y)?,
+            Op::Input => {
+                let in1 = comp.input.pop().ok_or(Error::EndOfInput)?;
+                params[0].set(comp, in1)?;
+            }
+            Op::Output => comp.output.push(params[0].get(comp)),
             Op::Halt => comp.halted = true,
         }
         Ok(())
