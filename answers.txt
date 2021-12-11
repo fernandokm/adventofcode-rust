@@ -13,6 +13,9 @@ Problem 2019.3 (real)
 Problem 2019.3 (test)
     [part 1] 6
     [part 2] 30
+Problem 2019.5 (real)
+    [part 1] 15386262
+    [part 2] 10376124
 Problem 2020.1 (real)
     [part 1] 1007104
     [part 2] 18847752
