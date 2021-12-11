@@ -48,6 +48,10 @@ pub enum Op {
     Mul,
     Input,
     Output,
+    JumpIfTrue,
+    JumpIfFalse,
+    LessThan,
+    Equals,
     Halt,
 }
 
@@ -58,6 +62,10 @@ impl Op {
             _ if opcode == W::from(2) => Ok(Op::Mul),
             _ if opcode == W::from(3) => Ok(Op::Input),
             _ if opcode == W::from(4) => Ok(Op::Output),
+            _ if opcode == W::from(5) => Ok(Op::JumpIfTrue),
+            _ if opcode == W::from(6) => Ok(Op::JumpIfFalse),
+            _ if opcode == W::from(7) => Ok(Op::LessThan),
+            _ if opcode == W::from(8) => Ok(Op::Equals),
             _ if opcode == W::from(99) => Ok(Op::Halt),
             _ => Err(Error::InvalidOpcode(opcode)),
         }
@@ -65,9 +73,10 @@ impl Op {
 
     pub fn param_count(self) -> usize {
         match self {
-            Op::Add | Op::Mul => 3,
-            Op::Input | Op::Output => 1,
             Op::Halt => 0,
+            Op::Input | Op::Output => 1,
+            Op::JumpIfTrue | Op::JumpIfFalse => 2,
+            Op::Add | Op::Mul | Op::LessThan | Op::Equals => 3,
         }
     }
 
@@ -84,17 +93,33 @@ impl Op {
                 params[0].set(comp, in1)?;
             }
             Op::Output => comp.output.push(params[0].get(comp)),
+            Op::JumpIfTrue => Self::jump_if(comp, params, |x| x != W::from(0)),
+            Op::JumpIfFalse => Self::jump_if(comp, params, |x| x == W::from(0)),
+            Op::LessThan => Self::binary(comp, params, |x, y| if x < y { 1 } else { 0 })?,
+            Op::Equals => Self::binary(comp, params, |x, y| if x == y { 1 } else { 0 })?,
             Op::Halt => comp.halted = true,
         }
         Ok(())
     }
 
-    fn binary<W: Word>(
+    fn binary<W: Word, IW: Into<W>>(
         comp: &mut Computer<W>,
         params: &[Parameter<W>],
-        f: impl Fn(W, W) -> W,
+        f: impl Fn(W, W) -> IW,
     ) -> Result<(), Error<W>> {
-        params[2].set(comp, f(params[0].get(comp), params[1].get(comp)))
+        let in1 = params[0].get(comp);
+        let in2 = params[1].get(comp);
+        params[2].set(comp, f(in1, in2).into())
+    }
+
+    fn jump_if<W: Word>(comp: &mut Computer<W>, params: &[Parameter<W>], f: impl Fn(W) -> bool) {
+        let in1 = params[0].get(comp);
+        if f(in1) {
+            // No need to worry about the instruction pointer being incremented
+            // at the end of the instruction (as warned in AoC page),
+            // since in out architecture the jump occurs after the ip is incremented.
+            comp.ip = params[1].get(comp);
+        }
     }
 }
 

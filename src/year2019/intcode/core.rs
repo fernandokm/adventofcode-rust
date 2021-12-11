@@ -12,6 +12,7 @@ use super::Instruction;
 pub trait Word:
     Copy
     + Eq
+    + Ord
     + Hash
     + Add<Output = Self>
     + Mul<Output = Self>
@@ -25,6 +26,7 @@ pub trait Word:
 impl<T> Word for T where
     T: Copy
         + Eq
+        + Ord
         + Hash
         + Add<Output = Self>
         + Mul<Output = Self>
@@ -48,7 +50,7 @@ pub enum Error<Word> {
     ReadonlyParameter { mode: &'static str },
 
     #[error("intcode error: end of input (no more input available)")]
-    EndOfInput
+    EndOfInput,
 }
 
 #[derive(Debug, Clone)]
