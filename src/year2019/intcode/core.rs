@@ -1,21 +1,38 @@
 use std::{
     hash::Hash,
-    ops::{Add, Mul},
+    ops::{Add, Div, Mul, Rem},
     str::FromStr,
 };
 
 use anyhow::Context;
 use rustc_hash::FxHashMap;
 
-use super::Op;
+use super::Instruction;
 
 pub trait Word:
-    Copy + Eq + Hash + Add<Output = Self> + Mul<Output = Self> + From<u8> + FromStr
+    Copy
+    + Eq
+    + Hash
+    + Add<Output = Self>
+    + Mul<Output = Self>
+    + Div<Output = Self>
+    + Rem<Output = Self>
+    + From<u8>
+    + FromStr
 {
 }
 
 impl<T> Word for T where
-    T: Copy + Eq + Hash + Add<Output = Self> + Mul<Output = Self> + From<u8> + FromStr + Send
+    T: Copy
+        + Eq
+        + Hash
+        + Add<Output = Self>
+        + Mul<Output = Self>
+        + Div<Output = Self>
+        + Rem<Output = Self>
+        + From<u8>
+        + FromStr
+        + Send
 {
 }
 
@@ -23,6 +40,12 @@ impl<T> Word for T where
 pub enum Error<Word> {
     #[error("intcode error: invalid opcode: {0}")]
     InvalidOpcode(Word),
+
+    #[error("intcode error: invalid parameter mode: {0}")]
+    InvalidParameterMode(Word),
+
+    #[error("intcode error: cannot set readonly parameter (parameter mode: {mode})")]
+    ReadonlyParameter { mode: &'static str },
 }
 
 #[derive(Debug, Clone)]
@@ -66,8 +89,8 @@ impl<W: Word> Computer<W> {
     }
 
     pub fn exec_single(&mut self) -> Result<(), Error<W>> {
-        let op = Op::from_opcode(self.next_word())?;
-        op.exec(self)
+        let inst = Instruction::next_from(self)?;
+        inst.exec(self)
     }
 
     pub fn exec(&mut self) -> Result<(), Error<W>> {
