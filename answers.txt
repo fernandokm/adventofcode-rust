@@ -16,6 +16,15 @@ Problem 2019.3 (test)
 Problem 2019.5 (real)
     [part 1] 15386262
     [part 2] 10376124
+Problem 2019.7 (real)
+    [part 1] 21000
+    [part 2] 61379886
+Problem 2019.7 (test_part1)
+    [part 1] 43210
+    [part 2] 98765
+Problem 2019.7 (test_part2)
+    [part 1] intcode error: deadlock detected
+    [part 2] 139629729
 Problem 2020.1 (real)
     [part 1] 1007104
     [part 2] 18847752

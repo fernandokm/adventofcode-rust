@@ -127,6 +127,28 @@ impl<W: Word> Computer<W> {
         Ok(())
     }
 
+    pub fn exec_all(comps: &mut [Computer<W>]) -> Result<(), Error<W>> {
+        loop {
+            let mut deadlock = true;
+            for comp in comps.iter_mut() {
+                if !comp.halted {
+                    match comp.exec_single() {
+                        Ok(_) => deadlock = false,
+                        Err(Error::EndOfInput | Error::OutputBufferOverflow { .. }) => continue,
+                        err @ Err(_) => return err,
+                    }
+                }
+            }
+            if deadlock {
+                if comps.iter().all(|c| c.halted) {
+                    return Ok(());
+                } else {
+                    return Err(Error::Deadlock);
+                };
+            }
+        }
+    }
+
     pub fn reset(&mut self) {
         self.ip = W::from(0);
         self.ram = self.initial_ram.clone();
