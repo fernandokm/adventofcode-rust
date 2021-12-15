@@ -66,6 +66,7 @@ pub enum Error<Word> {
 pub struct Computer<W: Word> {
     pub ram: FxHashMap<W, W>,
     pub ip: W,
+    pub relative_base: W,
     pub halted: bool,
     pub input: Channel<W>,
     pub output: Channel<W>,
@@ -91,6 +92,7 @@ where
             initial_ram: ram.clone(),
             ram,
             ip: W::from(0),
+            relative_base: W::from(0),
             halted: false,
             input: Channel::default(),
             output: Channel::default(),
@@ -151,6 +153,7 @@ impl<W: Word> Computer<W> {
 
     pub fn reset(&mut self) {
         self.ip = W::from(0);
+        self.relative_base = W::from(0);
         self.ram = self.initial_ram.clone();
         self.halted = false;
 

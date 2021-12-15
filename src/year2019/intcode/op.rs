@@ -7,6 +7,7 @@ use super::{Computer, Error, Word};
 pub enum Parameter<W: Word> {
     Position(W),
     Immediate(W),
+    Relative(W),
 }
 
 impl<W: Word> Default for Parameter<W> {
@@ -20,6 +21,7 @@ impl<W: Word> Parameter<W> {
         match () {
             _ if mode == W::from(0) => Ok(Parameter::Position(val)),
             _ if mode == W::from(1) => Ok(Parameter::Immediate(val)),
+            _ if mode == W::from(2) => Ok(Parameter::Relative(val)),
             _ => Err(Error::InvalidParameterMode(mode)),
         }
     }
@@ -28,6 +30,7 @@ impl<W: Word> Parameter<W> {
         match self {
             Parameter::Position(pos) => comp.ram_at(pos),
             Parameter::Immediate(val) => val,
+            Parameter::Relative(pos) => comp.ram_at(comp.relative_base + pos),
         }
     }
 
@@ -37,6 +40,9 @@ impl<W: Word> Parameter<W> {
                 comp.ram.insert(pos, val);
             }
             Parameter::Immediate(_) => return Err(Error::ReadonlyParameter { mode: "immediate" }),
+            Parameter::Relative(pos) => {
+                comp.ram.insert(comp.relative_base + pos, val);
+            }
         }
         Ok(())
     }
@@ -52,6 +58,7 @@ pub enum Op {
     JumpIfFalse,
     LessThan,
     Equals,
+    AddBase,
     Halt,
 }
 
@@ -66,6 +73,7 @@ impl Op {
             _ if opcode == W::from(6) => Ok(Op::JumpIfFalse),
             _ if opcode == W::from(7) => Ok(Op::LessThan),
             _ if opcode == W::from(8) => Ok(Op::Equals),
+            _ if opcode == W::from(9) => Ok(Op::AddBase),
             _ if opcode == W::from(99) => Ok(Op::Halt),
             _ => Err(Error::InvalidOpcode(opcode)),
         }
@@ -74,7 +82,7 @@ impl Op {
     pub fn param_count(self) -> usize {
         match self {
             Op::Halt => 0,
-            Op::Input | Op::Output => 1,
+            Op::Input | Op::Output | Op::AddBase => 1,
             Op::JumpIfTrue | Op::JumpIfFalse => 2,
             Op::Add | Op::Mul | Op::LessThan | Op::Equals => 3,
         }
@@ -94,6 +102,7 @@ impl Op {
             Op::JumpIfFalse => Self::jump_if(comp, params, |x| x == W::from(0)),
             Op::LessThan => Self::binary(comp, params, |x, y| if x < y { 1 } else { 0 })?,
             Op::Equals => Self::binary(comp, params, |x, y| if x == y { 1 } else { 0 })?,
+            Op::AddBase => comp.relative_base = comp.relative_base + params[0].get(comp),
             Op::Halt => comp.halted = true,
         }
         Ok(())
