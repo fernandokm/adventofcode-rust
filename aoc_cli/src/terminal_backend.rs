@@ -4,30 +4,38 @@ use aoc::input::InputSpec;
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 #[derive(Debug, Clone, Copy)]
+enum OutputType {
+    Inline,
+    Block,
+}
+
+#[derive(Debug, Clone, Copy)]
 pub struct TerminalOutputBackend {
     pub color_choice: ColorChoice,
     pub quiet: bool,
 }
 
 impl TerminalOutputBackend {
-    fn write_block(&self, stdout: &mut StandardStream, block: &dyn Display) -> aoc::Result<()> {
-        let s = block.to_string();
+    fn write(&self, stdout: &mut StandardStream, content: &dyn Display) -> aoc::Result<OutputType> {
+        let s = content.to_string();
         let s = s.trim();
         if s.contains('\n') {
+            let indent = str::repeat(" ", 8);
             for line in s.lines() {
-                write!(stdout, "\n    {}", line)?
+                write!(stdout, "\n{}{}", indent, line)?
             }
-            write!(stdout, "\n    ")?;
+            writeln!(stdout)?;
+            Ok(OutputType::Block)
         } else {
             write!(stdout, "{}", s)?;
+            Ok(OutputType::Inline)
         }
-        Ok(())
     }
 
     pub fn error(&self, err: &dyn std::fmt::Debug) -> aoc::Result<()> {
         let mut stdout = StandardStream::stdout(self.color_choice);
         stdout.set_color(ColorSpec::new().set_fg(Some(Color::Red)))?;
-        self.write_block(&mut stdout, &format!("{:?}", err))?;
+        self.write(&mut stdout, &format!("{:?}", err))?;
         writeln!(stdout)?;
         stdout.reset()?;
         Ok(())
@@ -58,16 +66,20 @@ impl aoc::ProblemOutputBackend for TerminalOutputBackend {
     ) -> aoc::Result<()> {
         let mut stdout = StandardStream::stdout(self.color_choice);
         write!(stdout, "    [part {}] ", part)?;
-        self.write_block(&mut stdout, solution)?;
+        let out_type = self.write(&mut stdout, solution)?;
 
         if self.quiet {
             writeln!(stdout)?;
         } else {
+            match out_type {
+                OutputType::Block => write!(stdout, "        ")?,
+                OutputType::Inline => write!(stdout, "    ")?,
+            }
             stdout.set_color(ColorSpec::new().set_dimmed(true))?;
             if let Some(err) = exec_time_err {
-                writeln!(stdout, "    (finished in {:.1?} ± {:.1?})", exec_time, err)?;
+                writeln!(stdout, "(finished in {:.1?} ± {:.1?})", exec_time, err)?;
             } else {
-                writeln!(stdout, "    (finished in {:.1?})", exec_time)?;
+                writeln!(stdout, "(finished in {:.1?})", exec_time)?;
             }
         }
 
