@@ -126,4 +126,13 @@ impl<W: Word> Computer<W> {
         }
         Ok(())
     }
+
+    pub fn reset(&mut self) {
+        self.ip = W::from(0);
+        self.ram = self.initial_ram.clone();
+        self.halted = false;
+
+        self.input.clear();
+        self.output.clear();
+    }
 }
