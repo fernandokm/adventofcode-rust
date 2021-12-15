@@ -215,3 +215,9 @@ Problem 2021.13 (test)
         #   #
         #####
 
+Problem 2021.14 (real)
+    [part 1] 3048
+    [part 2] 3288891573057
+Problem 2021.14 (test)
+    [part 1] 1588
+    [part 2] 2188189693529
