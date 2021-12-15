@@ -1,4 +1,5 @@
 use std::{
+    fmt::Debug,
     hash::Hash,
     ops::{Add, Div, Mul, Rem},
     str::FromStr,
@@ -7,7 +8,7 @@ use std::{
 use anyhow::Context;
 use rustc_hash::FxHashMap;
 
-use super::Instruction;
+use super::{Channel, Instruction};
 
 pub trait Word:
     Copy
@@ -20,6 +21,7 @@ pub trait Word:
     + Rem<Output = Self>
     + From<u8>
     + FromStr
+    + Debug
 {
 }
 
@@ -35,6 +37,7 @@ impl<T> Word for T where
         + From<u8>
         + FromStr
         + Send
+        + Debug
 {
 }
 
@@ -51,6 +54,12 @@ pub enum Error<Word> {
 
     #[error("intcode error: end of input (no more input available)")]
     EndOfInput,
+
+    #[error("intcode error: deadlock detected")]
+    Deadlock,
+
+    #[error("intcode error: output buffer overflow (max_len={max_len})")]
+    OutputBufferOverflow { max_len: usize },
 }
 
 #[derive(Debug, Clone)]
@@ -58,8 +67,10 @@ pub struct Computer<W: Word> {
     pub ram: FxHashMap<W, W>,
     pub ip: W,
     pub halted: bool,
-    pub input: Vec<W>,
-    pub output: Vec<W>,
+    pub input: Channel<W>,
+    pub output: Channel<W>,
+
+    initial_ram: FxHashMap<W, W>,
 }
 
 impl<W: Word, E> FromStr for Computer<W>
@@ -77,11 +88,12 @@ where
             i = i + W::from(1);
         }
         Ok(Computer {
+            initial_ram: ram.clone(),
             ram,
             ip: W::from(0),
             halted: false,
-            input: Vec::new(),
-            output: Vec::new(),
+            input: Channel::default(),
+            output: Channel::default(),
         })
     }
 }
@@ -98,8 +110,14 @@ impl<W: Word> Computer<W> {
     }
 
     pub fn exec_single(&mut self) -> Result<(), Error<W>> {
+        let old_ip = self.ip;
         let inst = Instruction::next_from(self)?;
-        inst.exec(self)
+
+        let result = inst.exec(self);
+        if result.is_err() {
+            self.ip = old_ip; // undo instruction pointer changes
+        }
+        result
     }
 
     pub fn exec(&mut self) -> Result<(), Error<W>> {

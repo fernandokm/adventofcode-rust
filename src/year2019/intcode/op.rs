@@ -88,11 +88,8 @@ impl Op {
         match self {
             Op::Add => Self::binary(comp, params, |x, y| x + y)?,
             Op::Mul => Self::binary(comp, params, |x, y| x * y)?,
-            Op::Input => {
-                let in1 = comp.input.pop().ok_or(Error::EndOfInput)?;
-                params[0].set(comp, in1)?;
-            }
-            Op::Output => comp.output.push(params[0].get(comp)),
+            Op::Input => comp.input.read().and_then(|val| params[0].set(comp, val))?,
+            Op::Output => comp.output.write(params[0].get(comp))?,
             Op::JumpIfTrue => Self::jump_if(comp, params, |x| x != W::from(0)),
             Op::JumpIfFalse => Self::jump_if(comp, params, |x| x == W::from(0)),
             Op::LessThan => Self::binary(comp, params, |x, y| if x < y { 1 } else { 0 })?,
@@ -123,6 +120,7 @@ impl Op {
     }
 }
 
+#[derive(Debug)]
 pub struct Instruction<W: Word> {
     op: Op,
     params: ArrayVec<[Parameter<W>; 3]>,
