@@ -184,3 +184,9 @@ Problem 2021.10 (real)
 Problem 2021.10 (test)
     [part 1] 26397
     [part 2] 288957
+Problem 2021.11 (real)
+    [part 1] 1729
+    [part 2] 237
+Problem 2021.11 (test)
+    [part 1] 1656
+    [part 2] 195
