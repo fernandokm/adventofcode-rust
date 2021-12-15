@@ -1,8 +1,4 @@
-use std::{
-    cell::RefCell,
-    ops::{Deref, DerefMut},
-    rc::Rc,
-};
+use std::{cell::RefCell, ops::DerefMut, rc::Rc};
 
 use super::{Error, Word};
 
@@ -37,13 +33,6 @@ enum ChannelInner<W: Word> {
 }
 
 impl<W: Word> ChannelInner<W> {
-    fn call<T>(&self, f: impl FnOnce(&ChannelData<W>) -> T) -> T {
-        match self {
-            ChannelInner::Unique(data) => f(data),
-            ChannelInner::Shared(data) => f(data.borrow().deref()),
-        }
-    }
-
     fn call_mut<T>(&mut self, f: impl FnOnce(&mut ChannelData<W>) -> T) -> T {
         match self {
             ChannelInner::Unique(data) => f(data),
@@ -93,10 +82,6 @@ impl<W: Word> Channel<W> {
         std::iter::repeat_with(|| self.read())
             .take_while(|res| res.is_ok())
             .map(|res| res.unwrap())
-    }
-
-    pub fn is_full(&self) -> bool {
-        self.inner.call(ChannelData::is_full)
     }
 
     pub fn write(&mut self, val: W) -> Result<(), Error<W>> {
