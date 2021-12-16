@@ -21,10 +21,10 @@ pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
         repeat_map_incresing_risk(Axis(0), 5, map1.view())?.view(),
     )?;
 
-    djikstra(map1.view_mut(), (0, 0));
+    djikstra(map1.view_mut(), (0, 0), (width - 1, height - 1));
     out.set_part1(map1.last().unwrap().total_risk);
 
-    djikstra(map2.view_mut(), (0, 0));
+    djikstra(map2.view_mut(), (0, 0), (5 * width - 1, 5 * height - 1));
     out.set_part2(map2.last().unwrap().total_risk);
 
     Ok(())
@@ -49,7 +49,7 @@ fn repeat_map_incresing_risk(
     )?)
 }
 
-fn djikstra(mut map: ArrayViewMut2<Node>, start: (usize, usize)) {
+fn djikstra(mut map: ArrayViewMut2<Node>, start: (usize, usize), end: (usize, usize)) {
     let mut tentative_total_risks =
         BinaryHeap::from_iter(map.indexed_iter().map(|(pos, _)| (Reverse(u32::MAX), pos)));
     tentative_total_risks.push((Reverse(0), start));
@@ -60,6 +60,9 @@ fn djikstra(mut map: ArrayViewMut2<Node>, start: (usize, usize)) {
         }
         map[pos].total_risk = total_risk;
         map[pos].is_tentative = false;
+        if pos == end {
+            return;
+        }
         let neighbors_pos = [
             (pos.0.wrapping_sub(1), pos.1),
             (pos.0 + 1, pos.1),
