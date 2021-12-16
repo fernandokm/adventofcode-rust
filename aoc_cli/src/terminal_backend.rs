@@ -24,7 +24,6 @@ impl TerminalOutputBackend {
             for line in s.lines() {
                 write!(stdout, "\n{}{}", indent, line)?
             }
-            writeln!(stdout)?;
             Ok(OutputType::Block)
         } else {
             write!(stdout, "{}", s)?;
