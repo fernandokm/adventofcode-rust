@@ -43,6 +43,9 @@ impl<T> Word for T where
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error<Word> {
+    #[error("intcode error: computer is halted")]
+    Halted,
+
     #[error("intcode error: invalid opcode: {0}")]
     InvalidOpcode(Word),
 
@@ -112,6 +115,10 @@ impl<W: Word> Computer<W> {
     }
 
     pub fn exec_single(&mut self) -> Result<(), Error<W>> {
+        if self.halted {
+            return Err(Error::Halted);
+        }
+
         let old_ip = self.ip;
         let inst = Instruction::next_from(self)?;
 
