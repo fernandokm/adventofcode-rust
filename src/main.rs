@@ -4,10 +4,10 @@ use rust_embed::RustEmbed;
 #[folder = "inputs"]
 struct EmbeddedInput;
 
+pub mod util;
 pub mod year2019;
 pub mod year2020;
 pub mod year2021;
-pub mod util;
 
 fn main() -> anyhow::Result<()> {
     let app = aoc_cli::parse();

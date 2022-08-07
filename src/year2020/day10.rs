@@ -47,7 +47,6 @@ fn count_arrangements(adapters: &[u32]) -> u64 {
             .skip(i + 1)
             .take_while(|&(_, b)| b - a <= 3)
             .for_each(|(j, _)| count[j] += count[i]);
-
     }
     *count.last().unwrap()
 }
