@@ -1,4 +1,4 @@
-use structopt::StructOpt;
+use clap::Parser;
 
 pub use terminal_backend::TerminalOutputBackend;
 mod terminal_backend;
@@ -6,11 +6,11 @@ mod terminal_backend;
 pub mod list;
 pub mod run;
 
-pub fn from_args() -> AocApp {
-    AocApp::from_args()
+pub fn parse() -> AocApp {
+    AocApp::parse()
 }
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, Parser)]
 pub enum AocApp {
     Run(run::RunCmd),
     List(list::ListCmd),

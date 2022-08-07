@@ -1,17 +1,17 @@
 use aoc::{ProblemId, Solver};
+use clap::Args;
 use itertools::Itertools;
-use structopt::StructOpt;
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, Args)]
 pub struct ListCmd {
-    #[structopt(
+    #[clap(
         short,
         long,
         help = "Show detailed information for each problem (available input files and solvers)"
     )]
     verbose: bool,
 
-    #[structopt(short, long, help = "List only problems from the specified years")]
+    #[clap(short, long, help = "List only problems from the specified years")]
     year: Vec<u32>,
 }
 

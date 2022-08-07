@@ -10,7 +10,7 @@ edition = "2021"
 anyhow = "1.0.48"
 aoc = { path = "../aoc" }
 atty = "0.2.14"
+clap = { version = "3.1.18", features = ["derive"] }
 itertools = "0.10.1"
 rustc-hash = "1.1.0"
-structopt = "0.3.25"
 termcolor = "1.1.2"

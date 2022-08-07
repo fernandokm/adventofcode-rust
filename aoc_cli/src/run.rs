@@ -1,17 +1,17 @@
 use std::str::FromStr;
 
 use aoc::{ProblemId, Solver};
+use clap::Args;
 use itertools::Itertools;
-use structopt::StructOpt;
 
 use crate::terminal_backend;
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, Args)]
 pub struct RunCmd {
-    #[structopt(short, long, help = "Run all the solvers")]
+    #[clap(short, long, help = "Run all the solvers")]
     all: bool,
 
-    #[structopt(
+    #[clap(
         short,
         long,
         help = "Run each solver multiple times",
@@ -19,14 +19,14 @@ pub struct RunCmd {
     )]
     repeat: u64,
 
-    #[structopt(
+    #[clap(
         name = "problems",
-        required_unless("all"),
+        required_unless_present("all"),
         help = "A list of problems to be solved, in the format yyyy[.dd][:variant] (ignored if --all is specified)"
     )]
     problems_filters: Vec<ProblemFilter>,
 
-    #[structopt(
+    #[clap(
         short,
         long,
         default_value = "auto",
@@ -34,7 +34,7 @@ pub struct RunCmd {
     )]
     color: ColorChoice,
 
-    #[structopt(short, long)]
+    #[clap(short, long)]
     quiet: bool,
 }
 

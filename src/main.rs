@@ -10,7 +10,7 @@ pub mod year2021;
 pub mod util;
 
 fn main() -> anyhow::Result<()> {
-    let app = aoc_cli::from_args();
+    let app = aoc_cli::parse();
     let default_inputs = aoc::input::from_embedded::<EmbeddedInput>()?;
     app.exec(default_inputs)
 }
