@@ -82,7 +82,7 @@ impl FromStr for Passport {
         for kv in s.split_whitespace() {
             let (k, v) = kv
                 .split_once(':')
-                .ok_or(anyhow::anyhow!("missing separator \":\""))?;
+                .ok_or_else(|| anyhow::anyhow!("missing separator \":\""))?;
 
             match k {
                 "byr" => p.byr = Some(v.to_string()),
