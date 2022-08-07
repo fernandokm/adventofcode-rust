@@ -1,5 +1,4 @@
 use aoc::ProblemOutput;
-use itertools::Itertools;
 
 aoc::register!(solve, 2020, 6);
 
@@ -8,7 +7,7 @@ pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
         .trim()
         .split("\n\n")
         .map(count)
-        .fold1(|(x1, x2), (y1, y2)| (x1 + y1, x2 + y2))
+        .reduce(|(x1, x2), (y1, y2)| (x1 + y1, x2 + y2))
         .unwrap_or_default();
     out.set_part1(count_part1);
     out.set_part2(count_part2);

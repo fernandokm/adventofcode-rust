@@ -111,6 +111,6 @@ impl SegDisplay {
         self.outputs
             .iter()
             .flat_map(|d| encodings.iter().position(|dd| dd == d))
-            .fold1(|acc, x| 10 * acc + x)
+            .reduce(|acc, x| 10 * acc + x)
     }
 }

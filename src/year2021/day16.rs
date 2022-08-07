@@ -14,7 +14,7 @@ pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
         .into_iter()
         .map(|c| {
             c.pad_using(16, |_| 0)
-                .fold1(|acc, x| (acc << 4) + x)
+                .reduce(|acc, x| (acc << 4) + x)
                 .unwrap()
         })
         .collect_vec();
