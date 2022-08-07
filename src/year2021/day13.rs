@@ -20,7 +20,7 @@ pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
     for (i, line) in instructions.trim().lines().enumerate() {
         let (axis, pos) = line
             .strip_prefix("fold along ")
-            .and_then(|s| s.split_once("="))
+            .and_then(|s| s.split_once('='))
             .context("invalid input")?;
         let pos = pos.parse()?;
         if axis == "x" {

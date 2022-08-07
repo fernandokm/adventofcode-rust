@@ -28,7 +28,7 @@ pub fn count_occupied(seats: &[Vec<char>]) -> usize {
         .sum()
 }
 
-pub fn update(seats: &mut Vec<Vec<char>>, aux: &mut Vec<Vec<char>>, part1: bool) -> bool {
+pub fn update(seats: &mut Vec<Vec<char>>, aux: &mut [Vec<char>], part1: bool) -> bool {
     let mut updated = false;
     for i in 0..seats.len() {
         for j in 0..seats[i].len() {

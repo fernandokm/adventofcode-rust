@@ -153,11 +153,11 @@ impl FromStr for ProblemFilter {
             day: None,
             variant: None,
         };
-        if let Some((rest, variant)) = s.split_once(":") {
+        if let Some((rest, variant)) = s.split_once(':') {
             s = rest;
             pf.variant = Some(variant.to_owned());
         }
-        if let Some((rest, day)) = s.split_once(".") {
+        if let Some((rest, day)) = s.split_once('.') {
             s = rest;
             pf.day = Some(day.parse()?);
         }
