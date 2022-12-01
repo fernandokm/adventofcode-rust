@@ -8,6 +8,7 @@ pub mod util;
 pub mod year2019;
 pub mod year2020;
 pub mod year2021;
+pub mod year2022;
 
 fn main() -> anyhow::Result<()> {
     let app = aoc_cli::parse();
