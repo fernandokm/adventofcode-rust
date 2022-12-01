@@ -100,8 +100,8 @@ impl Op {
             Op::Output => comp.output.write(params[0].get(comp))?,
             Op::JumpIfTrue => Self::jump_if(comp, params, |x| x != W::from(0)),
             Op::JumpIfFalse => Self::jump_if(comp, params, |x| x == W::from(0)),
-            Op::LessThan => Self::binary(comp, params, |x, y| if x < y { 1 } else { 0 })?,
-            Op::Equals => Self::binary(comp, params, |x, y| if x == y { 1 } else { 0 })?,
+            Op::LessThan => Self::binary(comp, params, |x, y| u8::from(x < y))?,
+            Op::Equals => Self::binary(comp, params, |x, y| u8::from(x == y))?,
             Op::AddBase => comp.relative_base = comp.relative_base + params[0].get(comp),
             Op::Halt => comp.halted = true,
         }

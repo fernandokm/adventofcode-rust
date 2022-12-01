@@ -30,11 +30,7 @@ pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
 fn most_common_bit(pos: usize, nums: &[u32]) -> u32 {
     let bit_at_pos = 1 << pos;
     let num_bits_1 = nums.iter().filter(|&&n| n & bit_at_pos != 0).count();
-    if num_bits_1 * 2 >= nums.len() {
-        1
-    } else {
-        0
-    }
+    u32::from(num_bits_1 * 2 >= nums.len())
 }
 
 fn filter_part_2(keep_most_common: bool, n_bits: usize, nums: &[u32]) -> Option<u32> {

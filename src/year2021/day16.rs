@@ -94,11 +94,7 @@ impl OpType {
 
     pub fn apply(self, values: impl Iterator<Item = u64>) -> u64 {
         fn comparison(mut values: impl Iterator<Item = u64>, f: impl Fn(u64, u64) -> bool) -> u64 {
-            if f(values.next().unwrap(), values.next().unwrap()) {
-                1
-            } else {
-                0
-            }
+            u64::from(f(values.next().unwrap(), values.next().unwrap()))
         }
 
         match self {
