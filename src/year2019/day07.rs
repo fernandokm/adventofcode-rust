@@ -7,7 +7,7 @@ use super::intcode::{self, Channel, Computer};
 
 aoc::register!(solve, 2019, 7);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     const MAX_LEN: Option<usize> = Some(5);
     let mut comps: Vec<Computer<i32>> = vec![input.parse()?; 5];
 

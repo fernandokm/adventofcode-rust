@@ -5,7 +5,7 @@ use rustc_hash::FxHashSet;
 
 aoc::register!(solve, 2021, 13);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let (dots, instructions) = input.split_once("\n\n").context("invalid input")?;
     let mut dots: FxHashSet<(usize, usize)> = dots
         .trim()

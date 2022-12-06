@@ -3,7 +3,7 @@ use itertools::Itertools;
 
 aoc::register!(solve, 2020, 1);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let nums: Vec<u64> = input
         .split_whitespace()
         .map(str::parse::<u64>)

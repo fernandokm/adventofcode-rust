@@ -5,7 +5,7 @@ use itertools::Itertools;
 
 aoc::register!(solve, 2021, 7);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     // Def: given an ordered list of positions L=[x0, ..., xn] (with x0 <= x1 <= ...
     // <= xn),      the cost of a point x is:
     //          C(x, L) := sum_i(|x-xi|).

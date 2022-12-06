@@ -6,7 +6,7 @@ use itertools::Itertools;
 
 aoc::register!(solve, 2020, 9);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let (preamble_len, nums) = input.split_once("---").context("invalid input")?;
     let preamble_len: usize = preamble_len.trim().parse()?;
     let nums: Vec<u64> = nums

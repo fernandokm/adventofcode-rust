@@ -6,7 +6,7 @@ use ndarray::{Array2, ArrayView2, ArrayViewMut2, Axis};
 
 aoc::register!(solve, 2021, 15);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let input_elems: Vec<Node> = input
         .chars()
         .filter_map(|c| Some(Node::new(c.to_digit(10)?)))
@@ -32,7 +32,7 @@ pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
 fn repeat_map_incresing_risk(
     axis: Axis,
     len: usize,
-    map: ArrayView2<Node>,
+    map: ArrayView2<'_, Node>,
 ) -> anyhow::Result<Array2<Node>> {
     let maps = &(0..len)
         .map(|i| {
@@ -48,7 +48,7 @@ fn repeat_map_incresing_risk(
     )?)
 }
 
-fn djikstra(mut map: ArrayViewMut2<Node>, start: (usize, usize), end: (usize, usize)) {
+fn djikstra(mut map: ArrayViewMut2<'_, Node>, start: (usize, usize), end: (usize, usize)) {
     let mut tentative_total_risks =
         BinaryHeap::from_iter(map.indexed_iter().map(|(pos, _)| (Reverse(u32::MAX), pos)));
     tentative_total_risks.push((Reverse(0), start));

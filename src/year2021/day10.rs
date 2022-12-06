@@ -4,7 +4,7 @@ use itertools::Itertools;
 
 aoc::register!(solve, 2021, 10);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let mut syntax_error_score = 0;
     let mut autocomplete_scores = Vec::new();
     'outer: for line in input.trim().lines() {

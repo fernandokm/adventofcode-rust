@@ -7,7 +7,7 @@ use rustc_hash::FxHashSet;
 
 aoc::register!(solve, 2020, 8);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let mut game = Game::new(input.lines().map(FromStr::from_str).try_collect()?);
     game.execute_to_end()?;
     out.set_part1(game.acc);

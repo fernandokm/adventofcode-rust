@@ -1,3 +1,5 @@
+#![deny(rust_2018_idioms)]
+
 use clap::Parser;
 pub use terminal_backend::TerminalOutputBackend;
 mod terminal_backend;

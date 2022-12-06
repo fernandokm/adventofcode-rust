@@ -5,11 +5,11 @@ use rustc_hash::FxHashMap;
 
 aoc::register!(solve, 2020, 14);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let instructions: Vec<_> = input
         .trim()
         .lines()
-        .map(|line| -> anyhow::Result<Instruction> {
+        .map(|line| -> anyhow::Result<Instruction<'_>> {
             if let Some(line) = line.strip_prefix("mem[") {
                 let (address, value) = line.split_once("] = ").context("invalid input")?;
                 Ok(Instruction::Assign {
@@ -45,7 +45,7 @@ pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn solve_part1(instructions: &[Instruction]) -> u64 {
+fn solve_part1(instructions: &[Instruction<'_>]) -> u64 {
     let mut mem: FxHashMap<u64, u64> = FxHashMap::default();
     let mut zero_mask = 0;
     let mut one_mask = 0;
@@ -70,7 +70,7 @@ fn solve_part1(instructions: &[Instruction]) -> u64 {
     mem.values().sum()
 }
 
-fn solve_part2(instructions: &[Instruction]) -> u64 {
+fn solve_part2(instructions: &[Instruction<'_>]) -> u64 {
     let mut mem: FxHashMap<u64, u64> = FxHashMap::default();
     let mut one_mask = 0;
     let mut floating_bits: Vec<usize> = Vec::new();

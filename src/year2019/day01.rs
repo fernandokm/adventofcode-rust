@@ -5,7 +5,7 @@ use itertools::Itertools;
 
 aoc::register!(solve, 2019, 1);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let masses: Vec<_> = input.trim().lines().map(u32::from_str).try_collect()?;
 
     out.set_part1(total_fuel_requirement(&masses, false));

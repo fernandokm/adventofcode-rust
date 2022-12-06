@@ -3,7 +3,7 @@ use aoc::ProblemOutput;
 
 aoc::register!(solve, 2021, 2);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let mut x = 0;
     let mut depth1 = 0;
     let mut depth2 = 0;

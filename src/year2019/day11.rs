@@ -7,7 +7,7 @@ use crate::util::Complex;
 
 aoc::register!(solve, 2019, 11);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let mut comp: Computer<i64> = input.parse()?;
     let mut panels: FxHashMap<Complex<i64>, i64> = FxHashMap::default();
 

@@ -5,7 +5,7 @@ use itertools::Itertools;
 
 aoc::register!(solve, 2021, 1);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let depths: Vec<u64> = input.trim().lines().map(FromStr::from_str).try_collect()?;
 
     out.set_part1(

@@ -6,7 +6,7 @@ use crate::util::Complex;
 
 aoc::register!(solve, 2020, 12);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let instructions: Vec<(char, i64)> = input
         .trim()
         .lines()

@@ -4,7 +4,7 @@ use itertools::Itertools;
 
 aoc::register!(solve, 2021, 3);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let n_bits = input.trim().lines().next().context("empty input")?.len();
     let nums: Vec<u32> = input
         .trim()

@@ -1,3 +1,5 @@
+#![deny(rust_2018_idioms)]
+
 use rust_embed::RustEmbed;
 
 #[derive(RustEmbed)]

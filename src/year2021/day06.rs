@@ -5,7 +5,7 @@ aoc::register!(solve, 2021, 6);
 static INITIAL_TIMER: usize = 6;
 static FIRST_INITIAL_TIMER: usize = INITIAL_TIMER + 2;
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let mut counts = vec![0; FIRST_INITIAL_TIMER + 1];
     for n in input.trim().split(',') {
         counts[n.parse::<usize>()?] += 1;

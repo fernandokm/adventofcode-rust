@@ -5,6 +5,7 @@
 
 // #![deny(clippy::missing_docs_in_private_items)]
 // #![warn(clippy::pedantic)]
+#![deny(rust_2018_idioms)]
 
 use std::{
     fmt::Display,
@@ -156,12 +157,12 @@ pub trait ProblemOutputBackend {
 
 pub struct Solver {
     pub problem_id: ProblemId,
-    pub raw_solve: fn(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()>,
+    pub raw_solve: fn(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()>,
 }
 
 // TODO: derive(Debug) causes an error. Why?
 impl std::fmt::Debug for Solver {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut builder = f.debug_struct("Solver");
         builder.field("problem_id", &self.problem_id);
         builder.field("raw_solve", &(self.raw_solve as *const ()));
@@ -170,7 +171,7 @@ impl std::fmt::Debug for Solver {
 }
 
 impl Solver {
-    pub fn solve(&self, input: &str, out: &mut ProblemOutput) -> Result<()> {
+    pub fn solve(&self, input: &str, out: &mut ProblemOutput<'_>) -> Result<()> {
         (self.raw_solve)(input, out).map_err(|e| match e.downcast() {
             Ok(e) => e,
             Err(e) => SolverError::SolverError(e),

@@ -4,7 +4,7 @@ use itertools::Itertools;
 
 aoc::register!(solve, 2021, 8);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let displays: Vec<_> = input
         .trim()
         .lines()

@@ -8,7 +8,7 @@ use crate::util::err::NONE_ERR;
 
 aoc::register!(solve, 2020, 16);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let input = parse_input(input).context("error parsing input")?;
 
     let mut err_rate = 0;
@@ -91,7 +91,7 @@ pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn parse_input(input: &str) -> anyhow::Result<Input> {
+fn parse_input(input: &str) -> anyhow::Result<Input<'_>> {
     let mut sections = input.trim().split("\n\n");
     let mut get_section =
         move || -> anyhow::Result<&str> { Ok(sections.next().ok_or(NONE_ERR)?.trim()) };

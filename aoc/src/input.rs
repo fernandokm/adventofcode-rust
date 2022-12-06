@@ -96,7 +96,7 @@ pub fn parse_input_filename(filename: &str) -> Result<InputSpec> {
 }
 
 pub trait Input {
-    fn get(&self, key: &InputSpec) -> Result<Cow<str>>;
+    fn get(&self, key: &InputSpec) -> Result<Cow<'_, str>>;
     // TODO: there are more efficient ways to do this
     fn keys(&self) -> Vec<&InputSpec>;
 }
@@ -151,7 +151,7 @@ impl<E: RustEmbed> EmbeddedInput<E> {
 }
 
 impl<E: RustEmbed> Input for EmbeddedInput<E> {
-    fn get(&self, spec: &InputSpec) -> Result<Cow<str>> {
+    fn get(&self, spec: &InputSpec) -> Result<Cow<'_, str>> {
         let file = self
             .file_paths
             .get(spec)
@@ -209,7 +209,7 @@ impl FSInput {
 }
 
 impl Input for FSInput {
-    fn get(&self, spec: &InputSpec) -> Result<Cow<str>> {
+    fn get(&self, spec: &InputSpec) -> Result<Cow<'_, str>> {
         let file_path = self
             .file_paths
             .get(spec)
@@ -259,7 +259,7 @@ impl<'a> Default for MemoryInput<'a> {
 }
 
 impl<'a> Input for MemoryInput<'a> {
-    fn get(&self, spec: &InputSpec) -> Result<Cow<str>> {
+    fn get(&self, spec: &InputSpec) -> Result<Cow<'_, str>> {
         let content = self
             .files
             .get(spec)
@@ -284,7 +284,7 @@ impl<I1: Input, I2: Input> ChainInput<I1, I2> {
 }
 
 impl<I1: Input, I2: Input> Input for ChainInput<I1, I2> {
-    fn get(&self, spec: &InputSpec) -> Result<Cow<str>> {
+    fn get(&self, spec: &InputSpec) -> Result<Cow<'_, str>> {
         match self.first.get(spec) {
             Err(InputError::NoInputAvailable { .. }) => self.second.get(spec),
             other => other,

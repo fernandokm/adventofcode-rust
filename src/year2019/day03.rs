@@ -7,7 +7,7 @@ use rustc_hash::{FxHashMap, FxHashSet};
 
 aoc::register!(solve, 2019, 3);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let (wire1, wire2) = input
         .trim()
         .lines()

@@ -10,7 +10,7 @@ use ndarray::{s, Array2};
 
 aoc::register!(solve, 2021, 5);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let lines: Vec<_> = input.trim().lines().map(Line::from_str).try_collect()?;
 
     let xmax = lines.iter().map(|line| line.x1.max(line.x2)).max().unwrap();

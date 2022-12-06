@@ -3,7 +3,7 @@ use itertools::Itertools;
 
 aoc::register!(solve, 2020, 11);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let mut seats1: Vec<Vec<_>> = input
         .trim()
         .lines()

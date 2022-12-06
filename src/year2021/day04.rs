@@ -6,7 +6,7 @@ use itertools::Itertools;
 
 aoc::register!(solve, 2021, 4);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let mut blocks = input.trim().split("\n\n");
     let numbers: Vec<u32> = blocks
         .next()

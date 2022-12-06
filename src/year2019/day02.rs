@@ -6,7 +6,7 @@ use super::intcode::{self, Computer};
 
 aoc::register!(solve, 2019, 2);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let mut comp: Computer<u32> = input.parse()?;
 
     out.set_part1(get_output(12, 2, &mut comp)?);

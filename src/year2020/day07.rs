@@ -4,7 +4,7 @@ use rustc_hash::FxHashMap;
 
 aoc::register!(solve, 2020, 7);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let direct: FxHashMap<_, _> = input.lines().map(parse_line).try_collect()?;
 
     let mut full = FxHashMap::default();

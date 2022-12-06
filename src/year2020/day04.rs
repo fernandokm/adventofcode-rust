@@ -6,7 +6,7 @@ use itertools::Itertools;
 
 aoc::register!(solve, 2020, 4);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let passports: Vec<Passport> = input
         .trim()
         .split("\n\n")

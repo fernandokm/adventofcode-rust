@@ -5,7 +5,7 @@ use regex::Regex;
 
 aoc::register!(solve, 2020, 2);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     lazy_static! {
         static ref RE: Regex = Regex::new("(\\d+)-(\\d+) (\\w): (\\w+)").unwrap();
     }

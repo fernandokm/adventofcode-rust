@@ -5,7 +5,7 @@ use itertools::Itertools;
 
 aoc::register!(solve, 2020, 10);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let mut adapters: Vec<u32> = input
         .split_whitespace()
         .map(FromStr::from_str)

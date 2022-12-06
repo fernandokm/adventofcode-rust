@@ -4,7 +4,7 @@ use rustc_hash::FxHashSet;
 
 aoc::register!(solve, 2021, 11);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let input = input.trim();
     let width = input.lines().next().unwrap().len();
     let height = input.lines().count();

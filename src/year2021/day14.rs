@@ -7,7 +7,7 @@ use rustc_hash::FxHashMap;
 
 aoc::register!(solve, 2021, 14);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let (template, rules) = input.split_once("\n\n").context("invalid input")?;
     let mut pairs: FxHashMap<(char, char), ElementPair> = rules
         .trim()

@@ -3,7 +3,7 @@ use itertools::Itertools;
 
 aoc::register!(solve, 2020, 5);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let mut ids = input.split_whitespace().map(parse_id).collect_vec();
     ids.sort_unstable();
 

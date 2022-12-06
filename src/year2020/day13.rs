@@ -5,7 +5,7 @@ use crate::util::math;
 
 aoc::register!(solve, 2020, 13);
 
-pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
+pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let (start, ids) = input.trim().split_once('\n').context("invalid input")?;
     let start: u64 = start.parse()?;
     let ids: Vec<Option<u64>> = ids.split(',').map(|id| id.parse().ok()).collect();
