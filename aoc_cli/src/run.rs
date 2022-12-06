@@ -22,7 +22,8 @@ pub struct RunCmd {
     #[clap(
         name = "problems",
         required_unless_present("all"),
-        help = "A list of problems to be solved, in the format yyyy[.dd][:variant] (ignored if --all is specified)"
+        help = "A list of problems to be solved, in the format yyyy[.dd][:variant] (ignored if \
+                --all is specified)"
     )]
     problems_filters: Vec<ProblemFilter>,
 

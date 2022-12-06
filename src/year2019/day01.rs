@@ -1,7 +1,7 @@
-use itertools::Itertools;
 use std::str::FromStr;
 
 use aoc::ProblemOutput;
+use itertools::Itertools;
 
 aoc::register!(solve, 2019, 1);
 

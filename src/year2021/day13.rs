@@ -1,8 +1,7 @@
 use anyhow::Context;
+use aoc::ProblemOutput;
 use itertools::Itertools;
 use rustc_hash::FxHashSet;
-
-use aoc::ProblemOutput;
 
 aoc::register!(solve, 2021, 13);
 

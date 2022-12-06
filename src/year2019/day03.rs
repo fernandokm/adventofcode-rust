@@ -1,9 +1,8 @@
 use std::str::FromStr;
 
 use anyhow::Context;
-use itertools::Itertools;
-
 use aoc::ProblemOutput;
+use itertools::Itertools;
 use rustc_hash::{FxHashMap, FxHashSet};
 
 aoc::register!(solve, 2019, 3);
@@ -40,7 +39,8 @@ pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
             .iter()
             .map(|pos| steps1[pos] + steps2[pos])
             .min()
-            .unwrap(), // at this points, we've already traversed intersections once and know it isn't empty
+            .unwrap(), /* at this points, we've already traversed intersections once and know it
+                        * isn't empty */
     );
 
     Ok(())

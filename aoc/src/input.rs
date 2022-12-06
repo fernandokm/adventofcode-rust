@@ -132,8 +132,9 @@ impl<E: RustEmbed> EmbeddedInput<E> {
         for file_path in E::iter() {
             let spec = parse_input_filename(&file_path)?;
             if let Some(old) = file_paths.insert(spec, file_path) {
-                // If we have a duplicate entry, recompute the spec (it was moved in the line above),
-                // recover the file path that was inserted into the map, and return an error.
+                // If we have a duplicate entry, recompute the spec (it was moved in the line
+                // above), recover the file path that was inserted into the map,
+                // and return an error.
                 let spec = parse_input_filename(&old).unwrap();
                 let file_path = file_paths.remove(&spec).unwrap();
                 return Err(InputError::DuplicateInputs {

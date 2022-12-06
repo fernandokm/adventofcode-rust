@@ -40,7 +40,8 @@ pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
      * so that (1.b) is true.
      *
      * Therefore, given j,k which solve (1), j,k+Δk also solves (1) iff Δk*ids[0]
-     * is a multiple of ids[j], i.e., Δk is a multiple of dk=ids[j]/gcd(ids[j], ids[0]).
+     * is a multiple of ids[j], i.e., Δk is a multiple of dk=ids[j]/gcd(ids[j],
+     * ids[0]).
      *
      * This means that there exists some k0, 0 <= k0 < dk, such that the
      * set of solutions to (1) with fixed j is exactly:

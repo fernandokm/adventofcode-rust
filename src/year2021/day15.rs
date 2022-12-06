@@ -1,9 +1,8 @@
 use std::{cmp::Reverse, collections::BinaryHeap};
 
+use aoc::ProblemOutput;
 use itertools::Itertools;
 use ndarray::{Array2, ArrayView2, ArrayViewMut2, Axis};
-
-use aoc::ProblemOutput;
 
 aoc::register!(solve, 2021, 15);
 

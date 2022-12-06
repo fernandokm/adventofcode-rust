@@ -6,13 +6,14 @@
 // #![deny(clippy::missing_docs_in_private_items)]
 // #![warn(clippy::pedantic)]
 
-use input::InputSpec;
-use linkme::distributed_slice;
-use rustc_hash::FxHashMap;
 use std::{
     fmt::Display,
     time::{Duration, Instant},
 };
+
+use input::InputSpec;
+use linkme::distributed_slice;
+use rustc_hash::FxHashMap;
 
 pub mod input;
 

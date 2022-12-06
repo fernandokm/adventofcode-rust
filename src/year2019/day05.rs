@@ -1,5 +1,4 @@
 use anyhow::Context;
-
 use aoc::ProblemOutput;
 
 use super::intcode::Computer;

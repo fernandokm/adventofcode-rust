@@ -1,7 +1,6 @@
+use aoc::ProblemOutput;
 use ndarray::Array2;
 use rustc_hash::FxHashSet;
-
-use aoc::ProblemOutput;
 
 aoc::register!(solve, 2021, 11);
 

@@ -1,7 +1,7 @@
-use itertools::Itertools;
 use std::collections::BTreeSet;
 
 use aoc::ProblemOutput;
+use itertools::Itertools;
 
 aoc::register!(solve, 2021, 9);
 

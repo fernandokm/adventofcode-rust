@@ -6,8 +6,8 @@ use itertools::Itertools;
 aoc::register!(solve, 2021, 7);
 
 pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
-    // Def: given an ordered list of positions L=[x0, ..., xn] (with x0 <= x1 <= ... <= xn),
-    //      the cost of a point x is:
+    // Def: given an ordered list of positions L=[x0, ..., xn] (with x0 <= x1 <= ...
+    // <= xn),      the cost of a point x is:
     //          C(x, L) := sum_i(|x-xi|).
     //      A point xp is optimal if it minimizes C(x).
     //
@@ -27,8 +27,8 @@ pub fn solve(input: &str, out: &mut ProblemOutput) -> anyhow::Result<()> {
     //              C(xp, L1) = sum_i(|x-xi|)
     //                        = (xn-xp) + (xp-x0) + sum_i(|x-xi|, 1<=i<n)
     //                        = xn-x0 + C(xp, L2).
-    //             Therefore, any point which minimizes the cost for L1 also minimizes
-    //             the cost for L2, and vice-versa.
+    //             Therefore, any point which minimizes the cost for L1 also
+    // minimizes             the cost for L2, and vice-versa.
     //
     // Prop 3: if L=[x0, ..., xn] has an even number of elements,
     //         then the set of optimal points is [x(n//2), x(n//2+1)];

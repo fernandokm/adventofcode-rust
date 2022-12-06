@@ -1,7 +1,7 @@
-use itertools::Itertools;
 use std::fmt::Display;
 
 use aoc::ProblemOutput;
+use itertools::Itertools;
 
 use super::intcode::{self, Channel, Computer};
 

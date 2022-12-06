@@ -1,10 +1,9 @@
 use std::str::FromStr;
 
+use anyhow::anyhow;
 use aoc::ProblemOutput;
 use itertools::Itertools;
 use rustc_hash::FxHashSet;
-
-use anyhow::anyhow;
 
 aoc::register!(solve, 2020, 8);
 

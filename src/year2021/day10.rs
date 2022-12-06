@@ -1,7 +1,6 @@
 use anyhow::bail;
-use itertools::Itertools;
-
 use aoc::ProblemOutput;
+use itertools::Itertools;
 
 aoc::register!(solve, 2021, 10);
 

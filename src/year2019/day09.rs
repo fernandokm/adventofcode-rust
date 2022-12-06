@@ -1,6 +1,5 @@
-use itertools::Itertools;
-
 use aoc::ProblemOutput;
+use itertools::Itertools;
 
 use super::intcode::Computer;
 

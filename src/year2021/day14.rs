@@ -1,10 +1,9 @@
 use std::cell::Cell;
 
 use anyhow::Context;
+use aoc::ProblemOutput;
 use itertools::Itertools;
 use rustc_hash::FxHashMap;
-
-use aoc::ProblemOutput;
 
 aoc::register!(solve, 2021, 14);
 

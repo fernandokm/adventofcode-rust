@@ -1,5 +1,4 @@
 use clap::Parser;
-
 pub use terminal_backend::TerminalOutputBackend;
 mod terminal_backend;
 

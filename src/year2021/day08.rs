@@ -1,7 +1,6 @@
 use anyhow::Context;
-use itertools::Itertools;
-
 use aoc::ProblemOutput;
+use itertools::Itertools;
 
 aoc::register!(solve, 2021, 8);
 

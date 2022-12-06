@@ -1,9 +1,8 @@
 use std::{cmp::Ordering, str::FromStr};
 
+use anyhow::Context;
 use aoc::ProblemOutput;
 use itertools::Itertools;
-
-use anyhow::Context;
 
 aoc::register!(solve, 2020, 9);
 
