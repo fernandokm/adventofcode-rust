@@ -249,3 +249,9 @@ Problem 2022.1 (real)
 Problem 2022.1 (test)
     [part 1] 24000
     [part 2] 45000
+Problem 2022.2 (real)
+    [part 1] 11449
+    [part 2] 13187
+Problem 2022.2 (test)
+    [part 1] 15
+    [part 2] 12
