@@ -13,7 +13,7 @@ pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
         .try_collect()?;
 
     out.set_part1(get(&numbers, 2020));
-    out.set_part2(get(&numbers, 30000000));
+    out.set_part2(get(&numbers, 30_000_000));
 
     Ok(())
 }

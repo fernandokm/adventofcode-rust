@@ -26,12 +26,12 @@ pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
             dots = dots
                 .into_iter()
                 .map(|(x, y)| if x > pos { (2 * pos - x, y) } else { (x, y) })
-                .collect()
+                .collect();
         } else {
             dots = dots
                 .into_iter()
                 .map(|(x, y)| if y > pos { (x, 2 * pos - y) } else { (x, y) })
-                .collect()
+                .collect();
         }
         if i == 0 {
             out.set_part1(dots.len());
@@ -43,9 +43,9 @@ pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let mut part2 = String::with_capacity((xmax + 1) * (ymax + 1));
     for y in 0..=ymax {
         for x in 0..=xmax {
-            part2.push(if dots.contains(&(x, y)) { '#' } else { ' ' })
+            part2.push(if dots.contains(&(x, y)) { '#' } else { ' ' });
         }
-        part2.push('\n')
+        part2.push('\n');
     }
     part2.pop();
 

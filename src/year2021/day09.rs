@@ -82,7 +82,7 @@ fn neighbors<T>(grid: &[Vec<T>], (i, j): (usize, usize)) -> impl Iterator<Item =
     let minus1 = 0usize.wrapping_sub(1);
     [(0, 1), (0, minus1), (1, 0), (minus1, 0)]
         .into_iter()
-        .flat_map(move |(di, dj)| get(grid, (i.wrapping_add(di), j.wrapping_add(dj))))
+        .filter_map(move |(di, dj)| get(grid, (i.wrapping_add(di), j.wrapping_add(dj))))
 }
 
 struct Point {

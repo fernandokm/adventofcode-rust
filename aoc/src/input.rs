@@ -15,15 +15,15 @@ use rustc_hash::FxHashMap;
 use crate::ProblemId;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub struct InputSpec {
+pub struct Spec {
     pub id: ProblemId,
     pub variant: String,
 }
 
 #[derive(Debug, thiserror::Error)]
-pub enum InputError {
+pub enum Error {
     #[error("No input available for ({}/{}/{})", spec.id.year, spec.id.day, spec.variant)]
-    NoInputAvailable { spec: InputSpec },
+    NoInputAvailable { spec: Spec },
 
     #[error("Invalid input file name: {filename}")]
     InvalidFileName { filename: String },
@@ -55,13 +55,13 @@ pub enum InputError {
     DuplicateInputs {
         filename1: String,
         filename2: String,
-        spec: InputSpec,
+        spec: Spec,
     },
 }
 
-type Result<T> = std::result::Result<T, InputError>;
+type Result<T> = std::result::Result<T, Error>;
 
-pub fn parse_input_filename(filename: &str) -> Result<InputSpec> {
+pub fn parse_input_filename(filename: &str) -> Result<Spec> {
     lazy_static! {
         static ref FILENAME_RE: Regex =
             Regex::new("^(?:.*/)?([0-9]+)/day([0-9]+)_([^\\.]+)\\.txt$").unwrap();
@@ -69,19 +69,19 @@ pub fn parse_input_filename(filename: &str) -> Result<InputSpec> {
 
     let captures = FILENAME_RE
         .captures(filename)
-        .ok_or(InputError::InvalidFileName {
+        .ok_or(Error::InvalidFileName {
             filename: filename.to_owned(),
         })?;
 
     let year = captures.get(1).unwrap().as_str();
-    let year: u32 = year.parse().map_err(|source| InputError::InvalidYear {
+    let year: u32 = year.parse().map_err(|source| Error::InvalidYear {
         filename: filename.to_owned(),
         year: year.to_owned(),
         source,
     })?;
 
     let day = captures.get(2).unwrap().as_str();
-    let day: u32 = day.parse().map_err(|source| InputError::InvalidDay {
+    let day: u32 = day.parse().map_err(|source| Error::InvalidDay {
         filename: filename.to_owned(),
         day: day.to_owned(),
         source,
@@ -89,46 +89,47 @@ pub fn parse_input_filename(filename: &str) -> Result<InputSpec> {
 
     let variant = captures.get(3).unwrap().as_str();
     let id = ProblemId { year, day };
-    Ok(InputSpec {
+    Ok(Spec {
         id,
         variant: variant.to_owned(),
     })
 }
 
-pub trait Input {
-    fn get(&self, key: &InputSpec) -> Result<Cow<'_, str>>;
+pub trait Source {
+    fn get(&self, key: &Spec) -> Result<Cow<'_, str>>;
     // TODO: there are more efficient ways to do this
-    fn keys(&self) -> Vec<&InputSpec>;
+    fn keys(&self) -> Vec<&Spec>;
 }
 
-pub fn from_embedded<E: RustEmbed>() -> Result<EmbeddedInput<E>> {
-    EmbeddedInput::new()
+pub fn from_embedded<E: RustEmbed>() -> Result<EmbeddedSource<E>> {
+    EmbeddedSource::new()
 }
 
-pub fn from_fs(path: impl AsRef<Path>) -> Result<FSInput> {
-    FSInput::new(path)
+pub fn from_fs(path: impl AsRef<Path>) -> Result<FSSource> {
+    FSSource::new(path)
 }
 
-pub fn from_file(spec: InputSpec, file_path: impl AsRef<Path>) -> FSInput {
-    FSInput::with_file(spec, file_path)
+pub fn from_file(spec: Spec, file_path: impl AsRef<Path>) -> FSSource {
+    FSSource::with_file(spec, file_path)
 }
 
-pub fn new_memory<'a>() -> MemoryInput<'a> {
-    MemoryInput::new()
+#[must_use]
+pub fn new_memory<'a>() -> MemorySource<'a> {
+    MemorySource::new()
 }
 
-pub fn chain<I1: Input, I2: Input>(first: I1, second: I2) -> ChainInput<I1, I2> {
-    ChainInput::new(first, second)
+pub fn chain<I1: Source, I2: Source>(first: I1, second: I2) -> ChainedSource<I1, I2> {
+    ChainedSource::new(first, second)
 }
 
-pub struct EmbeddedInput<E: RustEmbed> {
+pub struct EmbeddedSource<E: RustEmbed> {
     embed: PhantomData<*const E>,
-    file_paths: FxHashMap<InputSpec, Cow<'static, str>>,
+    file_paths: FxHashMap<Spec, Cow<'static, str>>,
 }
 
-impl<E: RustEmbed> EmbeddedInput<E> {
+impl<E: RustEmbed> EmbeddedSource<E> {
     pub fn new() -> Result<Self> {
-        let mut file_paths: FxHashMap<InputSpec, Cow<'static, str>> = FxHashMap::default();
+        let mut file_paths: FxHashMap<Spec, Cow<'static, str>> = FxHashMap::default();
         for file_path in E::iter() {
             let spec = parse_input_filename(&file_path)?;
             if let Some(old) = file_paths.insert(spec, file_path) {
@@ -137,7 +138,7 @@ impl<E: RustEmbed> EmbeddedInput<E> {
                 // and return an error.
                 let spec = parse_input_filename(&old).unwrap();
                 let file_path = file_paths.remove(&spec).unwrap();
-                return Err(InputError::DuplicateInputs {
+                return Err(Error::DuplicateInputs {
                     filename1: file_path.into_owned(),
                     filename2: old.into_owned(),
                     spec,
@@ -146,17 +147,17 @@ impl<E: RustEmbed> EmbeddedInput<E> {
         }
 
         let embed = PhantomData;
-        Ok(EmbeddedInput { embed, file_paths })
+        Ok(EmbeddedSource { embed, file_paths })
     }
 }
 
-impl<E: RustEmbed> Input for EmbeddedInput<E> {
-    fn get(&self, spec: &InputSpec) -> Result<Cow<'_, str>> {
+impl<E: RustEmbed> Source for EmbeddedSource<E> {
+    fn get(&self, spec: &Spec) -> Result<Cow<'_, str>> {
         let file = self
             .file_paths
             .get(spec)
             .and_then(|file_path| E::get(file_path))
-            .ok_or(InputError::NoInputAvailable { spec: spec.clone() })?;
+            .ok_or(Error::NoInputAvailable { spec: spec.clone() })?;
 
         let content = match file.data {
             Cow::Borrowed(data) => Cow::Borrowed(std::str::from_utf8(data)?),
@@ -165,35 +166,35 @@ impl<E: RustEmbed> Input for EmbeddedInput<E> {
         Ok(content)
     }
 
-    fn keys(&self) -> Vec<&InputSpec> {
+    fn keys(&self) -> Vec<&Spec> {
         self.file_paths.keys().collect()
     }
 }
 
 #[derive(Default)]
-pub struct FSInput {
-    file_paths: FxHashMap<InputSpec, PathBuf>,
+pub struct FSSource {
+    file_paths: FxHashMap<Spec, PathBuf>,
 }
 
-impl FSInput {
+impl FSSource {
     pub fn new(path: impl AsRef<Path>) -> Result<Self> {
-        let mut input = FSInput::default();
+        let mut source = FSSource::default();
         let path = path.as_ref();
         if path.is_file() {
-            input.add_path(path.to_path_buf())?;
+            source.add_path(path.to_path_buf())?;
         } else {
             for entry in std::fs::read_dir(path)? {
-                input.add_path(entry?.path())?;
+                source.add_path(entry?.path())?;
             }
         }
 
-        Ok(input)
+        Ok(source)
     }
 
-    pub fn with_file(spec: InputSpec, file_path: impl AsRef<Path>) -> Self {
-        let mut input = FSInput::default();
-        input.add_path_with_spec(spec, file_path.as_ref().to_path_buf());
-        input
+    pub fn with_file(spec: Spec, file_path: impl AsRef<Path>) -> Self {
+        let mut source = FSSource::default();
+        source.add_path_with_spec(spec, file_path.as_ref().to_path_buf());
+        source
     }
 
     pub fn add_path(&mut self, path: PathBuf) -> Result<()> {
@@ -203,95 +204,97 @@ impl FSInput {
         Ok(())
     }
 
-    pub fn add_path_with_spec(&mut self, spec: InputSpec, path: PathBuf) {
+    pub fn add_path_with_spec(&mut self, spec: Spec, path: PathBuf) {
         self.file_paths.insert(spec, path);
     }
 }
 
-impl Input for FSInput {
-    fn get(&self, spec: &InputSpec) -> Result<Cow<'_, str>> {
+impl Source for FSSource {
+    fn get(&self, spec: &Spec) -> Result<Cow<'_, str>> {
         let file_path = self
             .file_paths
             .get(spec)
-            .ok_or(InputError::NoInputAvailable { spec: spec.clone() })?;
+            .ok_or(Error::NoInputAvailable { spec: spec.clone() })?;
 
         let content = std::fs::read_to_string(file_path)?;
         Ok(Cow::Owned(content))
     }
 
-    fn keys(&self) -> Vec<&InputSpec> {
+    fn keys(&self) -> Vec<&Spec> {
         self.file_paths.keys().collect()
     }
 }
 
-pub struct MemoryInput<'a> {
-    files: FxHashMap<InputSpec, Cow<'a, str>>,
+pub struct MemorySource<'a> {
+    files: FxHashMap<Spec, Cow<'a, str>>,
 }
 
-impl<'a> MemoryInput<'a> {
+impl<'a> MemorySource<'a> {
+    #[must_use]
     pub fn new() -> Self {
-        MemoryInput {
+        MemorySource {
             files: FxHashMap::default(),
         }
     }
 
-    pub fn from(files: FxHashMap<InputSpec, Cow<'a, str>>) -> Self {
-        MemoryInput { files }
+    #[must_use]
+    pub fn from(files: FxHashMap<Spec, Cow<'a, str>>) -> Self {
+        MemorySource { files }
     }
 
-    pub fn add_cow(&mut self, spec: InputSpec, content: Cow<'a, str>) {
+    pub fn add_cow(&mut self, spec: Spec, content: Cow<'a, str>) {
         self.files.insert(spec, content);
     }
 
-    pub fn add_str(&mut self, spec: InputSpec, content: &'a str) {
-        self.add_cow(spec, Cow::Borrowed(content))
+    pub fn add_str(&mut self, spec: Spec, content: &'a str) {
+        self.add_cow(spec, Cow::Borrowed(content));
     }
 
-    pub fn add_string(&mut self, spec: InputSpec, content: String) {
-        self.add_cow(spec, Cow::Owned(content))
+    pub fn add_string(&mut self, spec: Spec, content: String) {
+        self.add_cow(spec, Cow::Owned(content));
     }
 }
 
-impl<'a> Default for MemoryInput<'a> {
+impl<'a> Default for MemorySource<'a> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<'a> Input for MemoryInput<'a> {
-    fn get(&self, spec: &InputSpec) -> Result<Cow<'_, str>> {
+impl<'a> Source for MemorySource<'a> {
+    fn get(&self, spec: &Spec) -> Result<Cow<'_, str>> {
         let content = self
             .files
             .get(spec)
-            .ok_or(InputError::NoInputAvailable { spec: spec.clone() })?;
+            .ok_or(Error::NoInputAvailable { spec: spec.clone() })?;
         Ok(Cow::Borrowed(content))
     }
 
-    fn keys(&self) -> Vec<&InputSpec> {
+    fn keys(&self) -> Vec<&Spec> {
         self.files.keys().collect()
     }
 }
 
-pub struct ChainInput<I1: Input, I2: Input> {
+pub struct ChainedSource<I1: Source, I2: Source> {
     first: I1,
     second: I2,
 }
 
-impl<I1: Input, I2: Input> ChainInput<I1, I2> {
+impl<I1: Source, I2: Source> ChainedSource<I1, I2> {
     pub fn new(first: I1, second: I2) -> Self {
-        ChainInput { first, second }
+        ChainedSource { first, second }
     }
 }
 
-impl<I1: Input, I2: Input> Input for ChainInput<I1, I2> {
-    fn get(&self, spec: &InputSpec) -> Result<Cow<'_, str>> {
+impl<I1: Source, I2: Source> Source for ChainedSource<I1, I2> {
+    fn get(&self, spec: &Spec) -> Result<Cow<'_, str>> {
         match self.first.get(spec) {
-            Err(InputError::NoInputAvailable { .. }) => self.second.get(spec),
+            Err(Error::NoInputAvailable { .. }) => self.second.get(spec),
             other => other,
         }
     }
 
-    fn keys(&self) -> Vec<&InputSpec> {
+    fn keys(&self) -> Vec<&Spec> {
         let mut keys = self.first.keys();
         keys.append(&mut self.second.keys());
         keys

@@ -49,8 +49,10 @@ fn repeat_map_incresing_risk(
 }
 
 fn djikstra(mut map: ArrayViewMut2<'_, Node>, start: (usize, usize), end: (usize, usize)) {
-    let mut tentative_total_risks =
-        BinaryHeap::from_iter(map.indexed_iter().map(|(pos, _)| (Reverse(u32::MAX), pos)));
+    let mut tentative_total_risks: BinaryHeap<_> = map
+        .indexed_iter()
+        .map(|(pos, _)| (Reverse(u32::MAX), pos))
+        .collect();
     tentative_total_risks.push((Reverse(0), start));
 
     while let Some((Reverse(total_risk), pos)) = tentative_total_risks.pop() {

@@ -19,7 +19,7 @@ pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
         (0..5)
             .permutations(5)
             .map(|phases| run_with_phases(&mut comps, &phases))
-            .fold_ok(0, |acc, x| acc.max(x)),
+            .fold_ok(0, i32::max),
     ));
 
     comps[0].input = Channel::new_shared(MAX_LEN);
@@ -28,7 +28,7 @@ pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
         (5..10)
             .permutations(5)
             .map(|phases| run_with_phases(&mut comps, &phases))
-            .fold_ok(0, |acc, x| acc.max(x)),
+            .fold_ok(0, i32::max),
     ));
 
     Ok(())

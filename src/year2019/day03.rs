@@ -56,8 +56,8 @@ fn get_steps(wire: &[Move]) -> FxHashMap<(i32, i32), i32> {
         let mut ys = vec![y];
         match m {
             Move::Up(val) => ys = (y + 1..=y + val).collect(),
-            Move::Down(val) => ys = (y - val..=y - 1).rev().collect(),
-            Move::Left(val) => xs = (x - val..=x - 1).rev().collect(),
+            Move::Down(val) => ys = (y - val..y).rev().collect(),
+            Move::Left(val) => xs = (x - val..x).rev().collect(),
             Move::Right(val) => xs = (x + 1..=x + val).collect(),
         }
         for &xx in &xs {

@@ -149,10 +149,10 @@ impl<W: Word> Computer<W> {
                 }
             }
             if deadlock {
-                if comps.iter().all(|c| c.halted) {
-                    return Ok(());
+                return if comps.iter().all(|c| c.halted) {
+                    Ok(())
                 } else {
-                    return Err(Error::Deadlock);
+                    Err(Error::Deadlock)
                 };
             }
         }

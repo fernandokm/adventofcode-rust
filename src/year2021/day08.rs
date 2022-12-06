@@ -32,7 +32,7 @@ pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     out.set_part2(
         displays
             .iter()
-            .map(|seg| seg.solve())
+            .map(SegDisplay::solve)
             .try_fold(0, |acc, xopt| xopt.map(|x| x + acc))
             .context("couldn't solve part 2")?,
     );
@@ -109,7 +109,7 @@ impl SegDisplay {
         let encodings = self.find_digit_encodings()?;
         self.outputs
             .iter()
-            .flat_map(|d| encodings.iter().position(|dd| dd == d))
+            .filter_map(|d| encodings.iter().position(|dd| dd == d))
             .reduce(|acc, x| 10 * acc + x)
     }
 }

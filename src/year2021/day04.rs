@@ -12,7 +12,7 @@ pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
         .next()
         .context("invalid input")?
         .split(',')
-        .map(|x| x.parse())
+        .map(str::parse)
         .try_collect()?;
 
     let mut boards: Vec<Board> = blocks.map(FromStr::from_str).try_collect()?;
@@ -20,7 +20,7 @@ pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     for &n in &numbers {
         for board in &mut boards {
             if let Some(score) = board.update(n) {
-                scores.push(score)
+                scores.push(score);
             }
         }
     }

@@ -1,6 +1,6 @@
 use std::{fmt::Display, io::Write, time::Duration};
 
-use aoc::input::InputSpec;
+use aoc::{input, ProblemOutputBackend};
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 #[derive(Debug, Clone, Copy)]
@@ -16,13 +16,13 @@ pub struct TerminalOutputBackend {
 }
 
 impl TerminalOutputBackend {
-    fn write(&self, stdout: &mut StandardStream, content: &dyn Display) -> aoc::Result<OutputType> {
+    fn write(stdout: &mut StandardStream, content: &dyn Display) -> aoc::Result<OutputType> {
         let s = content.to_string();
         let s = s.trim();
         if s.contains('\n') {
             let indent = str::repeat(" ", 8);
             for line in s.lines() {
-                write!(stdout, "\n{}{}", indent, line)?
+                write!(stdout, "\n{}{}", indent, line)?;
             }
             Ok(OutputType::Block)
         } else {
@@ -34,15 +34,15 @@ impl TerminalOutputBackend {
     pub fn error(&self, err: &dyn std::fmt::Debug) -> aoc::Result<()> {
         let mut stdout = StandardStream::stdout(self.color_choice);
         stdout.set_color(ColorSpec::new().set_fg(Some(Color::Red)))?;
-        self.write(&mut stdout, &format!("{:?}", err))?;
+        Self::write(&mut stdout, &format!("{:?}", err))?;
         writeln!(stdout)?;
         stdout.reset()?;
         Ok(())
     }
 }
 
-impl aoc::ProblemOutputBackend for TerminalOutputBackend {
-    fn start(&mut self, spec: &InputSpec) -> aoc::Result<()> {
+impl ProblemOutputBackend for TerminalOutputBackend {
+    fn start(&mut self, spec: &input::Spec) -> aoc::Result<()> {
         let mut stdout = StandardStream::stdout(self.color_choice);
         stdout.set_color(ColorSpec::new().set_bold(true))?;
 
@@ -65,7 +65,7 @@ impl aoc::ProblemOutputBackend for TerminalOutputBackend {
     ) -> aoc::Result<()> {
         let mut stdout = StandardStream::stdout(self.color_choice);
         write!(stdout, "    [part {}] ", part)?;
-        let out_type = self.write(&mut stdout, solution)?;
+        let out_type = Self::write(&mut stdout, solution)?;
 
         if self.quiet {
             writeln!(stdout)?;

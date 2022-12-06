@@ -27,13 +27,15 @@ pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
 fn to_string(panels: &FxHashMap<Complex<i64>, i64>) -> String {
     let (xmin, xmax) = panels.keys().map(|c| c.re).minmax().into_option().unwrap();
     let (ymin, ymax) = panels.keys().map(|c| c.im).minmax().into_option().unwrap();
-    let mut ident = String::with_capacity(((xmax - xmin + 1) * (ymax - ymin + 1)) as usize);
+    let width: usize = (xmax - xmin + 1).try_into().unwrap();
+    let height: usize = (ymax - ymin + 1).try_into().unwrap();
+    let mut ident = String::with_capacity(width * height);
     for y in (ymin..=ymax).rev() {
         for x in xmin..=xmax {
             let color = panels.get(&Complex::new(x, y)).copied().unwrap_or_default();
-            ident.push(if color == 1 { '#' } else { ' ' })
+            ident.push(if color == 1 { '#' } else { ' ' });
         }
-        ident.push('\n')
+        ident.push('\n');
     }
     ident.pop();
     ident

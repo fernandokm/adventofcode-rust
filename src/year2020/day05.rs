@@ -22,6 +22,7 @@ pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     Ok(())
 }
 
+#[must_use]
 pub fn parse_id(s: &str) -> u32 {
     s.chars().fold(0, |acc, c| {
         if c == 'B' || c == 'R' {

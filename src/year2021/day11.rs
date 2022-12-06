@@ -66,7 +66,7 @@ fn step(energy: &mut Array2<u32>) -> usize {
         }
     }
 
-    for &pos in flashes.iter() {
+    for &pos in &flashes {
         energy[pos] = 0;
     }
     flashes.len()

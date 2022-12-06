@@ -1,24 +1,27 @@
-//! Core AoC code.
+//! Core `AoC` code.
 //!
-//! Provides the tools used to define AoC solutions ([`register!`])
+//! Provides the tools used to define `AoC` solutions ([`register!`])
 //! and to read input data ([`input::Input`]).
 
-// #![deny(clippy::missing_docs_in_private_items)]
-// #![warn(clippy::pedantic)]
+#![warn(clippy::pedantic)]
 #![deny(rust_2018_idioms)]
+// TODO: enable docs lints (remove the following line)
+#![allow(missing_docs, clippy::missing_errors_doc, clippy::missing_panics_doc)]
+// TODO: enable docs in private items (uncomment the following line)
+// #![deny(clippy::missing_docs_in_private_items)]
 
 use std::{
     fmt::Display,
     time::{Duration, Instant},
 };
 
-use input::InputSpec;
+use input::Spec;
 use linkme::distributed_slice;
 use rustc_hash::FxHashMap;
 
 pub mod input;
 
-/// The error type for AoC solver errors.
+/// The error type for `AoC` solver errors.
 #[derive(Debug, thiserror::Error)]
 pub enum SolverError {
     /// Indicates that there was an IO error when printing the
@@ -45,10 +48,10 @@ macro_rules! not_implemented {
     };
 }
 
-/// A specialized [`Result`] for AoC solver errors.
+/// A specialized [`Result`] for `AoC` solver errors.
 pub type Result<T> = std::result::Result<T, SolverError>;
 
-/// Uniquely identifies an AoC problem.
+/// Uniquely identifies an `AoC` problem.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ProblemId {
     /// The year in which the problem was published.
@@ -72,7 +75,7 @@ pub struct ProblemOutput<'a> {
 }
 
 impl<'a> ProblemOutput<'a> {
-    pub fn start<B>(spec: &InputSpec, mut inner: B) -> Result<ProblemOutput<'a>>
+    pub fn start<B>(spec: &Spec, mut inner: B) -> Result<ProblemOutput<'a>>
     where
         B: ProblemOutputBackend + 'a,
     {
@@ -100,11 +103,12 @@ impl<'a> ProblemOutput<'a> {
         self.reset_elapsed_time();
         if self.output_enabled {
             let times = &self.part_time[(part - 1) as usize];
-            let exec_time = times.iter().sum::<Duration>() / times.len() as u32;
+            let times_len: u32 = times.len().try_into().expect("`times` too large");
+            let exec_time = times.iter().sum::<Duration>() / times_len;
             let exec_time_err = if times.len() == 1 {
                 None
             } else {
-                let n = times.len() as f64;
+                let n: f64 = times_len.into();
                 let sum_sqr_errs = times
                     .iter()
                     .map(|&t| {
@@ -123,7 +127,7 @@ impl<'a> ProblemOutput<'a> {
 
     pub fn set_part1(&mut self, solution: impl Display) {
         self.try_set_part1(solution)
-            .expect("Unexpected error setting the output for part 1")
+            .expect("Unexpected error setting the output for part 1");
     }
 
     pub fn try_set_part1(&mut self, solution: impl Display) -> Result<()> {
@@ -132,7 +136,7 @@ impl<'a> ProblemOutput<'a> {
 
     pub fn set_part2(&mut self, solution: impl Display) {
         self.try_set_part2(solution)
-            .expect("Unexpected error setting the output for part 2")
+            .expect("Unexpected error setting the output for part 2");
     }
 
     pub fn try_set_part2(&mut self, solution: impl Display) -> Result<()> {
@@ -140,12 +144,12 @@ impl<'a> ProblemOutput<'a> {
     }
 
     pub fn reset_elapsed_time(&mut self) {
-        self.last_instant = Instant::now()
+        self.last_instant = Instant::now();
     }
 }
 
 pub trait ProblemOutputBackend {
-    fn start(&mut self, spec: &InputSpec) -> Result<()>;
+    fn start(&mut self, spec: &Spec) -> Result<()>;
     fn set_solution(
         &mut self,
         part: u32,
@@ -178,12 +182,15 @@ impl Solver {
         })
     }
 
+    #[must_use]
     pub fn get_map() -> FxHashMap<ProblemId, &'static Solver> {
         let mut m: FxHashMap<ProblemId, &'static Solver> = FxHashMap::default();
         for s in SOLVERS {
-            if m.insert(s.problem_id, s).is_some() {
-                panic!("Multiple solver implementations for {}", s.problem_id);
-            }
+            assert!(
+                m.insert(s.problem_id, s).is_none(),
+                "Multiple solver implementations for {}",
+                s.problem_id
+            );
         }
         m
     }

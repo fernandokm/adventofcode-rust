@@ -1,13 +1,13 @@
 use std::str::FromStr;
 
-use aoc::{ProblemId, Solver};
+use aoc::{input, ProblemId, ProblemOutput, Solver};
 use clap::Args;
 use itertools::Itertools;
 
 use crate::terminal_backend;
 
 #[derive(Debug, Args)]
-pub struct RunCmd {
+pub struct Cmd {
     #[clap(short, long, help = "Run all the solvers")]
     all: bool,
 
@@ -39,12 +39,12 @@ pub struct RunCmd {
     quiet: bool,
 }
 
-impl RunCmd {
-    pub fn exec(&self, default_inputs: impl aoc::input::Input) -> anyhow::Result<()> {
+impl Cmd {
+    pub fn exec(&self, default_inputs: &impl input::Source) -> anyhow::Result<()> {
         let solvers = Solver::get_map();
         if self.all {
             for solver in solvers.values().sorted_by_key(|s| s.problem_id) {
-                self.run_solver(solver, &default_inputs)?;
+                self.run_solver(solver, default_inputs)?;
             }
             return Ok(());
         }
@@ -52,10 +52,10 @@ impl RunCmd {
         for pf in &self.problems_filters {
             if let Some(day) = pf.day {
                 let solver = solvers.get(&ProblemId { year: pf.year, day }).unwrap();
-                self.run_solver(solver, &default_inputs)?;
+                self.run_solver(solver, default_inputs)?;
             } else if let Some(problems) = problems_by_year.get(&pf.year) {
                 for &p in problems.iter().sorted() {
-                    self.run_solver(solvers.get(&p).unwrap(), &default_inputs)?;
+                    self.run_solver(solvers.get(&p).unwrap(), default_inputs)?;
                 }
             } else {
                 println!("No problems found for \"{}\"", pf.raw);
@@ -67,7 +67,7 @@ impl RunCmd {
     fn run_solver(
         &self,
         solver: &Solver,
-        default_inputs: &impl aoc::input::Input,
+        default_inputs: &impl input::Source,
     ) -> anyhow::Result<()> {
         let mut input_specs = default_inputs
             .keys()
@@ -109,7 +109,7 @@ impl RunCmd {
                 continue;
             }
 
-            let mut out = aoc::ProblemOutput::start(spec, backend)?;
+            let mut out = ProblemOutput::start(spec, backend)?;
             out.disable_output();
             let input = default_inputs.get(spec).unwrap();
 
@@ -194,9 +194,8 @@ impl From<ColorChoice> for termcolor::ColorChoice {
     fn from(val: ColorChoice) -> Self {
         match val {
             ColorChoice::Always => termcolor::ColorChoice::Always,
-            ColorChoice::Never => termcolor::ColorChoice::Never,
             ColorChoice::Auto if atty::is(atty::Stream::Stdout) => termcolor::ColorChoice::Auto,
-            ColorChoice::Auto => termcolor::ColorChoice::Never,
+            ColorChoice::Never | ColorChoice::Auto => termcolor::ColorChoice::Never,
         }
     }
 }

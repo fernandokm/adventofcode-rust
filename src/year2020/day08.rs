@@ -17,7 +17,7 @@ pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
         match old_op {
             Op::Jmp => game.mem[i].op = Op::Nop,
             Op::Nop => game.mem[i].op = Op::Jmp,
-            _ => continue,
+            Op::Acc => continue,
         };
 
         game.reset();
@@ -42,6 +42,7 @@ pub struct Game {
 }
 
 impl Game {
+    #[must_use]
     pub fn new(mem: Vec<Instruction>) -> Self {
         Self {
             acc: 0,
@@ -55,9 +56,9 @@ impl Game {
         self.pos = if offset == -offset && offset != 0 {
             None
         } else if offset > 0 {
-            self.pos.checked_add(offset as usize)
+            self.pos.checked_add(offset.unsigned_abs())
         } else {
-            self.pos.checked_sub((-offset) as usize)
+            self.pos.checked_sub(offset.unsigned_abs())
         }
         .ok_or_else(|| anyhow!("offset out of bounds: {}", offset))?;
 
@@ -122,6 +123,7 @@ impl FromStr for Instruction {
 }
 
 impl Instruction {
+    #[must_use]
     pub fn new(op: Op, arg: isize) -> Self {
         Self { op, arg }
     }

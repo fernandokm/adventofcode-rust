@@ -11,6 +11,7 @@ impl<T> Complex<T> {
         Self { re, im }
     }
 
+    #[must_use]
     pub fn conj(self) -> Self
     where
         T: Neg<Output = T>,

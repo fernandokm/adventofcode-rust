@@ -30,7 +30,7 @@ pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
         .iter()
         .filter_map(|inst| match inst {
             Instruction::Mask(s) => Some(s.chars().filter(|&c| c == 'X').count()),
-            _ => None,
+            Instruction::Assign { .. } => None,
         })
         .max()
         .unwrap();

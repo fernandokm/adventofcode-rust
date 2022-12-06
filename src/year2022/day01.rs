@@ -12,7 +12,7 @@ pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
                 .sum::<u64>()
         })
         .collect_vec();
-    calories_per_elf.sort();
+    calories_per_elf.sort_unstable();
 
     out.set_part1(calories_per_elf.last().unwrap());
     out.set_part1(calories_per_elf.iter().rev().take(3).sum::<u64>());

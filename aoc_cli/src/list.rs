@@ -1,9 +1,9 @@
-use aoc::{ProblemId, Solver};
+use aoc::{input, ProblemId, Solver};
 use clap::Args;
 use itertools::Itertools;
 
 #[derive(Debug, Args)]
-pub struct ListCmd {
+pub struct Cmd {
     #[clap(
         short,
         long,
@@ -15,8 +15,8 @@ pub struct ListCmd {
     year: Vec<u32>,
 }
 
-impl ListCmd {
-    pub fn exec(&self, default_inputs: impl aoc::input::Input) -> anyhow::Result<()> {
+impl Cmd {
+    pub fn exec(&self, default_inputs: &impl input::Source) -> anyhow::Result<()> {
         if self.verbose {
             for (year, group) in &Solver::get_map().into_iter().group_by(|(id, _)| id.year) {
                 if !self.year.is_empty() && !self.year.contains(&year) {
@@ -70,7 +70,7 @@ impl ListCmd {
             heading,
             value_list,
             " ".repeat(width.saturating_sub(6 + heading.len() + value_list.len())),
-        )
+        );
     }
 }
 

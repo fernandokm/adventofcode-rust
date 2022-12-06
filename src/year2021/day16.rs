@@ -8,7 +8,7 @@ pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let data = input
         .trim()
         .chars()
-        .flat_map(|c| Some(c.to_digit(16)? as u64))
+        .filter_map(|c| Some(c.to_digit(16)? as u64))
         .chunks(16)
         .into_iter()
         .map(|c| {
@@ -191,7 +191,7 @@ impl Packet {
     pub fn value(&self) -> u64 {
         match &self.data {
             &PacketData::Literal(val) => val,
-            PacketData::Operation(op, subpackets) => op.apply(subpackets.iter().map(|p| p.value())),
+            PacketData::Operation(op, subpackets) => op.apply(subpackets.iter().map(Packet::value)),
         }
     }
 }

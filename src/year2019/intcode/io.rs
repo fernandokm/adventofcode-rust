@@ -1,4 +1,4 @@
-use std::{cell::RefCell, ops::DerefMut, rc::Rc};
+use std::{cell::RefCell, rc::Rc};
 
 use super::{Error, Word};
 
@@ -36,7 +36,7 @@ impl<W: Word> ChannelInner<W> {
     fn call_mut<T>(&mut self, f: impl FnOnce(&mut ChannelData<W>) -> T) -> T {
         match self {
             ChannelInner::Unique(data) => f(data),
-            ChannelInner::Shared(data) => f(data.borrow_mut().deref_mut()),
+            ChannelInner::Shared(data) => f(&mut *data.borrow_mut()),
         }
     }
 }
@@ -80,8 +80,8 @@ impl<W: Word> Channel<W> {
 
     pub fn iter(&mut self) -> impl Iterator<Item = W> + '_ {
         std::iter::repeat_with(|| self.read())
-            .take_while(|res| res.is_ok())
-            .map(|res| res.unwrap())
+            .take_while(Result::is_ok)
+            .map(Result::unwrap)
     }
 
     pub fn write(&mut self, val: W) -> Result<(), Error<W>> {

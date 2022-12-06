@@ -41,7 +41,7 @@ pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
         })
         .collect_vec();
 
-    while field_names.iter().any(|name| name.is_none()) {
+    while field_names.iter().any(Option::is_none) {
         let mut changed = false;
         for &field in &fields {
             let mut idx = possible_names_per_field
@@ -65,7 +65,7 @@ pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
                 changed = true;
                 let field_name = possible_names_per_field[i].remove(0);
                 field_names[i] = Some(field_name);
-                for possible_names in possible_names_per_field.iter_mut() {
+                for possible_names in &mut possible_names_per_field {
                     if let Some((j, _)) = possible_names.iter().find_position(|&&s| s == field_name)
                     {
                         possible_names.swap_remove(j);

@@ -75,7 +75,7 @@ pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
                 .map(|k0| (k..).step_by(step).find(|&new_k| new_k % dk == k0).unwrap())
                 .find(|&new_k| (new_k * id0 + j as u64) % idj == 0)
                 .context(format!("no new_k found for id {}", idj))?;
-            step = math::lcm(step, dk as usize);
+            step = math::lcm(step, dk.try_into().unwrap());
             Ok(())
         })?;
 
