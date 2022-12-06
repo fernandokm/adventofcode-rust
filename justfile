@@ -17,3 +17,4 @@ build-release:
 
 save: build-release
   {{bin_release}} run -qa > {{output}}
+  git --no-pager diff --color=always --unified=2 {{output}} | tail -n+6

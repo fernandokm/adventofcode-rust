@@ -245,7 +245,7 @@ Problem 2021.16 (test)
     [part 2] 15
 Problem 2022.1 (real)
     [part 1] 67658
-    [part 1] 200158
+    [part 2] 200158
 Problem 2022.1 (test)
     [part 1] 24000
-    [part 1] 45000
+    [part 2] 45000
