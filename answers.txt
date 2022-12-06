@@ -255,3 +255,9 @@ Problem 2022.2 (real)
 Problem 2022.2 (test)
     [part 1] 15
     [part 2] 12
+Problem 2022.3 (real)
+    [part 1] 7793
+    [part 2] 2499
+Problem 2022.3 (test)
+    [part 1] 157
+    [part 2] 70
