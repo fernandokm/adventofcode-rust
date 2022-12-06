@@ -267,3 +267,9 @@ Problem 2022.4 (real)
 Problem 2022.4 (test)
     [part 1] 2
     [part 2] 4
+Problem 2022.5 (real)
+    [part 1] FRDSQRRCD
+    [part 2] HRFTQVWNN
+Problem 2022.5 (test)
+    [part 1] CMZ
+    [part 2] MCD
