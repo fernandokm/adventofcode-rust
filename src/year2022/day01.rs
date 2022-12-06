@@ -15,7 +15,7 @@ pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     calories_per_elf.sort_unstable();
 
     out.set_part1(calories_per_elf.last().unwrap());
-    out.set_part1(calories_per_elf.iter().rev().take(3).sum::<u64>());
+    out.set_part2(calories_per_elf.iter().rev().take(3).sum::<u64>());
 
     Ok(())
 }
