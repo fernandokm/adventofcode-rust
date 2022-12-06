@@ -1,4 +1,7 @@
-use std::str::FromStr;
+use std::{
+    str::FromStr,
+    time::{Duration, Instant},
+};
 
 use aoc::{input, ProblemId, ProblemOutput, Solver};
 use clap::Args;
@@ -12,12 +15,21 @@ pub struct Cmd {
     all: bool,
 
     #[clap(
-        short,
+        short = 'n',
         long,
-        help = "Run each solver multiple times",
+        help = "Run each solver at least this many times",
         default_value = "1"
     )]
-    repeat: u64,
+    min_runs: u64,
+
+    #[clap(
+        short = 't',
+        long,
+        value_parser = parse_duration_s,
+        help = "Run each solver for at least this many seconds (we consider the total time for both parts of each day)",
+        default_value = "0",
+    )]
+    min_duration_s: Duration,
 
     #[clap(
         name = "problems",
@@ -113,12 +125,21 @@ impl Cmd {
             out.disable_output();
             let input = default_inputs.get(spec).unwrap();
 
-            for i in 0..self.repeat {
-                if i == self.repeat - 1 {
+            let start = Instant::now();
+
+            for i in 0.. {
+                // NOTE: this condition means that we're running the code one iteration more
+                // than strictly necessary to satisfy min_duration_s
+                let total_time = start.elapsed();
+                let is_last_iter = i >= self.min_runs - 1 && total_time >= self.min_duration_s;
+                if is_last_iter {
                     out.enable_output();
                 }
                 if let Err(e) = solver.solve(&input, &mut out) {
                     backend.error(&e)?;
+                    break;
+                }
+                if is_last_iter {
                     break;
                 }
             }
@@ -198,4 +219,8 @@ impl From<ColorChoice> for termcolor::ColorChoice {
             ColorChoice::Never | ColorChoice::Auto => termcolor::ColorChoice::Never,
         }
     }
+}
+
+fn parse_duration_s(raw: &str) -> Result<Duration, <f64 as FromStr>::Err> {
+    Ok(Duration::from_secs_f64(raw.parse()?))
 }

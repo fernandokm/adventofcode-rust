@@ -2,6 +2,7 @@ use std::{fmt::Display, io::Write, time::Duration};
 
 use aoc::{input, ProblemOutputBackend};
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
+use thousands::Separable;
 
 #[derive(Debug, Clone, Copy)]
 enum OutputType {
@@ -61,6 +62,7 @@ impl ProblemOutputBackend for TerminalOutputBackend {
         part: u32,
         exec_time: Duration,
         exec_time_err: Option<Duration>,
+        exec_count: u32,
         solution: &dyn Display,
     ) -> aoc::Result<()> {
         let mut stdout = StandardStream::stdout(self.color_choice);
@@ -76,9 +78,13 @@ impl ProblemOutputBackend for TerminalOutputBackend {
             }
             stdout.set_color(ColorSpec::new().set_dimmed(true))?;
             if let Some(err) = exec_time_err {
-                writeln!(stdout, "(finished in {:.1?} ± {:.1?})", exec_time, err)?;
+                let exec_count_s = exec_count.separate_with_underscores();
+                writeln!(
+                    stdout,
+                    "(finished in {exec_time:.1?} ± {err:.1?}, {exec_count_s} runs)"
+                )?;
             } else {
-                writeln!(stdout, "(finished in {:.1?})", exec_time)?;
+                writeln!(stdout, "(finished in {exec_time:.1?})")?;
             }
         }
 

@@ -120,7 +120,7 @@ impl<'a> ProblemOutput<'a> {
                 Some(Duration::from_secs_f64(variance.sqrt()))
             };
             self.inner
-                .set_solution(part, exec_time, exec_time_err, &solution)?;
+                .set_solution(part, exec_time, exec_time_err, times_len, &solution)?;
         }
         Ok(())
     }
@@ -155,6 +155,7 @@ pub trait ProblemOutputBackend {
         part: u32,
         exec_time: Duration,
         exec_time_err: Option<Duration>,
+        exec_count: u32,
         solution: &dyn Display,
     ) -> Result<()>;
 }
