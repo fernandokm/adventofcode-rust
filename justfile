@@ -6,10 +6,16 @@ scripts := 'scripts'
 dev: build-dev
   {{bin_dev}} run "$({{scripts}}/get-latest-solution.sh)"
 
+dev-all: build-dev
+  {{bin_dev}} run --all
+
 build-dev:
   cargo build
 
 release: build-release
+  {{bin_release}} run "$({{scripts}}/get-latest-solution.sh)"
+
+release-all: build-release
   {{bin_release}} run --all
 
 build-release:
