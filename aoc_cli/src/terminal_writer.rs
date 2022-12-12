@@ -1,6 +1,6 @@
-use std::{fmt::Display, io::Write, time::Duration};
+use std::{fmt::Display, io::Write};
 
-use aoc::{input, ProblemOutputBackend};
+use aoc::{input, stats::Stats, Part, SolutionWriter};
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 use thousands::Separable;
 
@@ -11,12 +11,12 @@ enum OutputType {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct TerminalOutputBackend {
+pub struct TerminalWriter {
     pub color_choice: ColorChoice,
     pub quiet: bool,
 }
 
-impl TerminalOutputBackend {
+impl TerminalWriter {
     fn write(stdout: &mut StandardStream, content: &dyn Display) -> aoc::Result<OutputType> {
         let s = content.to_string();
         let s = s.trim();
@@ -42,8 +42,8 @@ impl TerminalOutputBackend {
     }
 }
 
-impl ProblemOutputBackend for TerminalOutputBackend {
-    fn start(&mut self, spec: &input::Spec) -> aoc::Result<()> {
+impl SolutionWriter for TerminalWriter {
+    fn write_heading(&mut self, spec: &input::Spec) -> aoc::Result<()> {
         let mut stdout = StandardStream::stdout(self.color_choice);
         stdout.set_color(ColorSpec::new().set_bold(true))?;
 
@@ -57,12 +57,10 @@ impl ProblemOutputBackend for TerminalOutputBackend {
         Ok(())
     }
 
-    fn set_solution(
+    fn write_solution(
         &mut self,
-        part: u32,
-        exec_time: Duration,
-        exec_time_err: Option<Duration>,
-        exec_count: u32,
+        part: Part,
+        stats: &Stats,
         solution: &dyn Display,
     ) -> aoc::Result<()> {
         let mut stdout = StandardStream::stdout(self.color_choice);
@@ -77,14 +75,25 @@ impl ProblemOutputBackend for TerminalOutputBackend {
                 OutputType::Inline => write!(stdout, "    ")?,
             }
             stdout.set_color(ColorSpec::new().set_dimmed(true))?;
-            if let Some(err) = exec_time_err {
+            let Stats {
+                exec_count,
+                exec_time_mean,
+                exec_time_std,
+            } = stats;
+            if let Some(exec_time_std) = exec_time_std {
                 let exec_count_s = exec_count.separate_with_underscores();
+                #[allow(clippy::cast_precision_loss)]
+                let std_percent =
+                    (exec_time_std.as_nanos() as f64) / (exec_time_mean.as_nanos() as f64) * 100.0;
+                #[allow(clippy::cast_possible_truncation)]
+                let total_time = *exec_time_mean * (*exec_count as u32);
                 writeln!(
                     stdout,
-                    "(finished in {exec_time:.1?} ± {err:.1?}, {exec_count_s} runs)"
+                    "(finished in {exec_time_mean:.1?} ± {exec_time_std:.1?} \
+                     (±{std_percent:.1}%), {exec_count_s} runs totaling {total_time:.1?})"
                 )?;
             } else {
-                writeln!(stdout, "(finished in {exec_time:.1?})")?;
+                writeln!(stdout, "(finished in {exec_time_mean:.1?})")?;
             }
         }
 

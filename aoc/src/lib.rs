@@ -10,16 +10,15 @@
 // TODO: enable docs in private items (uncomment the following line)
 // #![deny(clippy::missing_docs_in_private_items)]
 
-use std::{
-    fmt::Display,
-    time::{Duration, Instant},
-};
+use std::fmt::{Display, Write};
 
 use input::Spec;
 use linkme::distributed_slice;
 use rustc_hash::FxHashMap;
+use stats::Stats;
 
 pub mod input;
+pub mod stats;
 
 /// The error type for `AoC` solver errors.
 #[derive(Debug, thiserror::Error)]
@@ -67,97 +66,111 @@ impl Display for ProblemId {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Part {
+    One,
+    Two,
+}
+
+impl Part {
+    #[must_use]
+    pub fn to_index(self) -> usize {
+        match self {
+            Self::One => 0,
+            Self::Two => 1,
+        }
+    }
+}
+
+impl Display for Part {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Part::One => f.write_char('1'),
+            Part::Two => f.write_char('2'),
+        }
+    }
+}
+
+// TODO: do we need both lifetimes here?
 pub struct ProblemOutput<'a> {
-    inner: Box<dyn ProblemOutputBackend + 'a>,
-    last_instant: Instant,
-    part_time: [Vec<Duration>; 2],
-    output_enabled: bool,
+    writer: &'a mut (dyn SolutionWriter + 'a),
+    monitor: stats::Monitor,
 }
 
 impl<'a> ProblemOutput<'a> {
-    pub fn start<B>(spec: &Spec, mut inner: B) -> Result<ProblemOutput<'a>>
-    where
-        B: ProblemOutputBackend + 'a,
-    {
-        inner.start(spec)?;
-        Ok(ProblemOutput {
-            inner: Box::new(inner),
-            last_instant: Instant::now(),
-            part_time: [Vec::new(), Vec::new()],
-            output_enabled: true,
-        })
+    pub fn start(spec: &Spec, writer: &'a mut (impl SolutionWriter + 'a)) -> Result<Self> {
+        writer.write_heading(spec)?;
+
+        let mut monitor = stats::Monitor::default();
+        monitor.reset();
+        Ok(Self { writer, monitor })
     }
 
-    pub fn disable_output(&mut self) {
-        self.output_enabled = false;
+    #[must_use]
+    pub fn stats(&self, part: Part) -> Stats {
+        self.monitor.stats(part)
     }
 
-    pub fn enable_output(&mut self) {
-        self.output_enabled = true;
+    pub fn reset_timer(&mut self) {
+        self.monitor.reset();
     }
 
-    fn try_set(&mut self, part: u32, solution: impl Display) -> Result<()> {
-        debug_assert!(part == 1 || part == 2);
+    fn try_set(&mut self, part: Part, solution: impl Display) -> Result<()> {
+        self.monitor.finish(part);
 
-        self.part_time[(part - 1) as usize].push(self.last_instant.elapsed());
-        self.reset_elapsed_time();
-        if self.output_enabled {
-            let times = &self.part_time[(part - 1) as usize];
-            let times_len: u32 = times.len().try_into().expect("`times` too large");
-            let exec_time = times.iter().sum::<Duration>() / times_len;
-            let exec_time_err = if times.len() == 1 {
-                None
-            } else {
-                let n: f64 = times_len.into();
-                let sum_sqr_errs = times
-                    .iter()
-                    .map(|&t| {
-                        let err_secs = t.as_secs_f64() - exec_time.as_secs_f64();
-                        err_secs * err_secs
-                    })
-                    .sum::<f64>();
-                let variance = sum_sqr_errs / (n - 1.0);
-                Some(Duration::from_secs_f64(variance.sqrt()))
-            };
-            self.inner
-                .set_solution(part, exec_time, exec_time_err, times_len, &solution)?;
-        }
+        let stats = self.monitor.stats(part);
+        self.writer.write_solution(part, &stats, &solution)?;
+
+        self.monitor.reset();
         Ok(())
     }
 
     pub fn set_part1(&mut self, solution: impl Display) {
-        self.try_set_part1(solution)
+        self.try_set(Part::One, solution)
             .expect("Unexpected error setting the output for part 1");
     }
 
-    pub fn try_set_part1(&mut self, solution: impl Display) -> Result<()> {
-        self.try_set(1, solution)
-    }
-
     pub fn set_part2(&mut self, solution: impl Display) {
-        self.try_set_part2(solution)
+        self.try_set(Part::Two, solution)
             .expect("Unexpected error setting the output for part 2");
-    }
-
-    pub fn try_set_part2(&mut self, solution: impl Display) -> Result<()> {
-        self.try_set(2, solution)
-    }
-
-    pub fn reset_elapsed_time(&mut self) {
-        self.last_instant = Instant::now();
     }
 }
 
-pub trait ProblemOutputBackend {
-    fn start(&mut self, spec: &Spec) -> Result<()>;
-    fn set_solution(
-        &mut self,
-        part: u32,
-        exec_time: Duration,
-        exec_time_err: Option<Duration>,
-        exec_count: u32,
-        solution: &dyn Display,
-    ) -> Result<()>;
+pub trait SolutionWriter {
+    fn write_heading(&mut self, spec: &Spec) -> Result<()>;
+    fn write_solution(&mut self, part: Part, stats: &Stats, solution: &dyn Display) -> Result<()>;
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct NullWriter {
+    pub heading: Option<Spec>,
+    pub solutions: [Option<(Stats, String)>; 2],
+}
+
+impl NullWriter {
+    pub fn pipe_to(&self, other: &mut impl SolutionWriter) -> Result<()> {
+        if let Some(heading) = &self.heading {
+            other.write_heading(heading)?;
+        }
+        for part in [Part::One, Part::Two] {
+            if let Some((stats, solution)) = &self.solutions[part.to_index()] {
+                other.write_solution(Part::One, stats, solution)?;
+            }
+        }
+        Ok(())
+    }
+}
+
+impl SolutionWriter for NullWriter {
+    fn write_heading(&mut self, spec: &Spec) -> Result<()> {
+        self.heading = Some(spec.clone());
+        Ok(())
+    }
+
+    fn write_solution(&mut self, part: Part, stats: &Stats, solution: &dyn Display) -> Result<()> {
+        self.solutions[part.to_index()] = Some((*stats, solution.to_string()));
+        Ok(())
+    }
 }
 
 pub struct Solver {

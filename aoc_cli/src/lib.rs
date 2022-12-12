@@ -5,8 +5,8 @@
 
 use aoc::input;
 use clap::Parser;
-pub use terminal_backend::TerminalOutputBackend;
-mod terminal_backend;
+pub use terminal_writer::TerminalWriter;
+mod terminal_writer;
 
 pub mod list;
 pub mod run;

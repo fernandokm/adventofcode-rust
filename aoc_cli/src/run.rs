@@ -1,13 +1,13 @@
-use std::{
-    str::FromStr,
-    time::{Duration, Instant},
-};
+use std::{str::FromStr, time::Duration};
 
-use aoc::{input, ProblemId, ProblemOutput, Solver};
+use aoc::{
+    input::{self, Spec},
+    NullWriter, Part, ProblemId, ProblemOutput, Solver,
+};
 use clap::Args;
 use itertools::Itertools;
 
-use crate::terminal_backend;
+use crate::terminal_writer;
 
 #[derive(Debug, Args)]
 pub struct Cmd {
@@ -87,12 +87,12 @@ impl Cmd {
             .filter(|spec| spec.id == solver.problem_id)
             .sorted_unstable_by(|spec1, spec2| spec1.variant.cmp(&spec2.variant))
             .peekable();
-        let backend = terminal_backend::TerminalOutputBackend {
+        let mut writer = terminal_writer::TerminalWriter {
             color_choice: self.color.into(),
             quiet: self.quiet,
         };
         if input_specs.peek().is_none() {
-            backend.error(&format!("No input files found for: {}", solver.problem_id))?;
+            writer.error(&format!("No input files found for: {}", solver.problem_id))?;
         }
 
         let target_pfs = self
@@ -121,37 +121,61 @@ impl Cmd {
                 continue;
             }
 
-            let mut out = ProblemOutput::start(spec, backend)?;
-            out.disable_output();
-            let input = default_inputs.get(spec).unwrap();
-
-            let start = Instant::now();
-
-            for i in 0.. {
-                // NOTE: this condition means that we're running the code one iteration more
-                // than strictly necessary to satisfy min_duration_s
-                let total_time = start.elapsed();
-                let is_last_iter = i >= self.min_runs - 1 && total_time >= self.min_duration_s;
-                if is_last_iter {
-                    out.enable_output();
-                }
-                if let Err(e) = solver.solve(&input, &mut out) {
-                    backend.error(&e)?;
-                    break;
-                }
-                if is_last_iter {
-                    break;
-                }
+            if self.min_runs <= 1 {
+                Self::run_solver_once(spec, solver, &mut writer, default_inputs)?;
+            } else {
+                self.run_solver_bench(spec, solver, &mut writer, default_inputs)?;
             }
         }
 
         if !target_variants.is_empty() {
-            backend.error(&format!(
+            writer.error(&format!(
                 "Missing inputs: {}",
                 target_variants.iter().join(", ")
             ))?;
         }
 
+        Ok(())
+    }
+
+    fn run_solver_once(
+        spec: &Spec,
+        solver: &Solver,
+        writer: &mut terminal_writer::TerminalWriter,
+        default_inputs: &impl input::Source,
+    ) -> anyhow::Result<()> {
+        let mut out = ProblemOutput::start(spec, writer)?;
+        let input = default_inputs.get(spec).unwrap();
+
+        if let Err(e) = solver.solve(&input, &mut out) {
+            writer.error(&e)?;
+        }
+        Ok(())
+    }
+
+    fn run_solver_bench(
+        &self,
+        spec: &Spec,
+        solver: &Solver,
+        writer: &mut terminal_writer::TerminalWriter,
+        default_inputs: &impl input::Source,
+    ) -> anyhow::Result<()> {
+        let mut null_writer = NullWriter::default();
+        let mut out = ProblemOutput::start(spec, &mut null_writer)?;
+        let input = default_inputs.get(spec).unwrap();
+
+        for i in 0.. {
+            out.reset_timer();
+            if let Err(e) = solver.solve(&input, &mut out) {
+                writer.error(&e)?;
+                break;
+            }
+            let total_time = out.stats(Part::One).total_time() + out.stats(Part::Two).total_time();
+            if i >= self.min_runs - 1 && total_time >= self.min_duration_s {
+                break;
+            }
+        }
+        null_writer.pipe_to(writer)?;
         Ok(())
     }
 }
