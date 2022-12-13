@@ -282,3 +282,9 @@ Problem 2022.6 (test1)
 Problem 2022.6 (test2)
     [part 1] 11
     [part 2] 26
+Problem 2022.7 (real)
+    [part 1] 1077191
+    [part 2] 5649896
+Problem 2022.7 (test)
+    [part 1] 95437
+    [part 2] 24933642
