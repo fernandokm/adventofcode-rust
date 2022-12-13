@@ -273,3 +273,12 @@ Problem 2022.5 (real)
 Problem 2022.5 (test)
     [part 1] CMZ
     [part 2] MCD
+Problem 2022.6 (real)
+    [part 1] 1655
+    [part 2] 2665
+Problem 2022.6 (test1)
+    [part 1] 7
+    [part 2] 19
+Problem 2022.6 (test2)
+    [part 1] 11
+    [part 2] 26
