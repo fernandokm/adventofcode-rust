@@ -63,7 +63,6 @@ pub struct Stats {
 impl Stats {
     #[must_use]
     pub fn new(exec_times: &[Duration]) -> Self {
-        let start = Instant::now();
         let exec_time_total = exec_times.iter().sum::<Duration>();
         #[allow(clippy::cast_possible_truncation)]
         let exec_time_mean: Duration = exec_time_total / exec_times.len() as u32;
@@ -78,7 +77,6 @@ impl Stats {
             let secs = (exec_time_err2_secs / (exec_times.len() - 1) as f64).sqrt();
             Some(Duration::from_secs_f64(secs))
         };
-        println!("Stats creation took {:.1?}", start.elapsed());
         Self {
             exec_count: exec_times.len(),
             exec_time_total,

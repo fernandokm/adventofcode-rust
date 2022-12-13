@@ -14,7 +14,7 @@ use rustc_hash::FxHashMap;
 
 use crate::ProblemId;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Spec {
     pub id: ProblemId,
     pub variant: String,

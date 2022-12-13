@@ -1,21 +1,20 @@
 use std::{str::FromStr, time::Duration};
 
+use anyhow::{anyhow, Context};
 use aoc::{
     input::{self, Spec},
-    ProblemId, ProblemOutput, Solver,
+    ProblemOutput, Solver,
 };
 use clap::Args;
 use itertools::Itertools;
+use rustc_hash::FxHashSet;
 
 use crate::terminal_writer;
 
-const MAX_DROPPED_PERCENT: f64 = 0.05;
+const MAX_DROPPED_PERCENT: f64 = 0.25;
 
 #[derive(Debug, Args)]
 pub struct Cmd {
-    #[clap(short, long, help = "Run all the solvers")]
-    all: bool,
-
     #[clap(
         short = 'n',
         long,
@@ -35,7 +34,6 @@ pub struct Cmd {
 
     #[clap(
         name = "problems",
-        required_unless_present("all"),
         help = "A list of problems to be solved, in the format yyyy[.dd][:variant] (ignored if \
                 --all is specified)"
     )]
@@ -55,86 +53,54 @@ pub struct Cmd {
 
 impl Cmd {
     pub fn exec(&self, default_inputs: &impl input::Source) -> anyhow::Result<()> {
+        let specs = self.find_specs(default_inputs);
         let solvers = Solver::get_map();
-        if self.all {
-            for solver in solvers.values().sorted_by_key(|s| s.problem_id) {
-                self.run_solver(solver, default_inputs)?;
-            }
-            return Ok(());
-        }
-        let problems_by_year = solvers.keys().copied().into_group_map_by(|val| val.year);
-        for pf in &self.problems_filters {
-            if let Some(day) = pf.day {
-                let solver = solvers.get(&ProblemId { year: pf.year, day }).unwrap();
-                self.run_solver(solver, default_inputs)?;
-            } else if let Some(problems) = problems_by_year.get(&pf.year) {
-                for &p in problems.iter().sorted() {
-                    self.run_solver(solvers.get(&p).unwrap(), default_inputs)?;
-                }
-            } else {
-                println!("No problems found for \"{}\"", pf.raw);
-            }
+        for spec in specs {
+            let solver = solvers
+                .get(&spec.id)
+                .ok_or_else(|| anyhow!("No solver found for problem {}", spec.id))?;
+            let input = default_inputs.get(spec).unwrap();
+            self.run_solver(spec, solver, &input)?;
         }
         Ok(())
     }
 
-    fn run_solver(
-        &self,
-        solver: &Solver,
-        default_inputs: &impl input::Source,
-    ) -> anyhow::Result<()> {
-        let mut input_specs = default_inputs
-            .keys()
+    fn find_specs<'a>(&self, default_inputs: &'a impl input::Source) -> Vec<&'a Spec> {
+        let mut specs = FxHashSet::default();
+        let mut useful = vec![false; self.problems_filters.len()];
+        for spec in default_inputs.keys() {
+            for (i, pf) in self.problems_filters.iter().enumerate() {
+                if pf.matches_spec(spec) {
+                    useful[i] = true;
+                    specs.insert(spec);
+                }
+            }
+        }
+        let not_useful = useful
             .into_iter()
-            .filter(|spec| spec.id == solver.problem_id)
-            .sorted_unstable_by(|spec1, spec2| spec1.variant.cmp(&spec2.variant))
-            .peekable();
+            .enumerate()
+            .filter(|(_i, useful)| !useful)
+            .map(|(i, _useful)| &self.problems_filters[i].raw)
+            .collect_vec();
+        if !not_useful.is_empty() {
+            println!(
+                "Warning: the following filters didn't match any problems:\n  {}",
+                not_useful.into_iter().join("\n  ")
+            );
+        }
+        specs.into_iter().sorted_unstable().collect()
+    }
+
+    fn run_solver(&self, spec: &Spec, solver: &Solver, input: &str) -> anyhow::Result<()> {
         let mut writer = terminal_writer::TerminalWriter {
             color_choice: self.color.into(),
             quiet: self.quiet,
         };
-        if input_specs.peek().is_none() {
-            writer.error(&format!("No input files found for: {}", solver.problem_id))?;
-        }
 
-        let target_pfs = self
-            .problems_filters
-            .iter()
-            .filter(|pf| {
-                pf.year == solver.problem_id.year
-                    && pf.day.map_or(true, |day| day == solver.problem_id.day)
-            })
-            .collect_vec();
-        let all_variants = target_pfs.iter().any(|pf| pf.variant.is_none());
-        let mut target_variants = target_pfs
-            .iter()
-            .filter_map(|pf| pf.variant.as_ref())
-            .collect_vec();
-
-        for spec in input_specs {
-            let variant_pos = target_variants
-                .iter()
-                .find_position(|&&v| v == &spec.variant)
-                .map(|(i, _)| i);
-            if let Some(i) = variant_pos {
-                target_variants.swap_remove(i);
-            }
-            if !self.all && !all_variants && variant_pos.is_none() {
-                continue;
-            }
-
-            if self.min_runs <= 1 {
-                Self::run_solver_once(spec, solver, &mut writer, default_inputs)?;
-            } else {
-                self.run_solver_bench(spec, solver, &mut writer, default_inputs)?;
-            }
-        }
-
-        if !target_variants.is_empty() {
-            writer.error(&format!(
-                "Missing inputs: {}",
-                target_variants.iter().join(", ")
-            ))?;
+        if self.min_runs <= 1 {
+            Self::run_solver_once(spec, solver, &mut writer, input)?;
+        } else {
+            self.run_solver_bench(spec, solver, &mut writer, input)?;
         }
 
         Ok(())
@@ -144,12 +110,10 @@ impl Cmd {
         spec: &Spec,
         solver: &Solver,
         writer: &mut terminal_writer::TerminalWriter,
-        default_inputs: &impl input::Source,
+        input: &str,
     ) -> anyhow::Result<()> {
         let mut out = ProblemOutput::start(spec, writer)?;
-        let input = default_inputs.get(spec).unwrap();
-
-        if let Err(e) = solver.solve(&input, &mut out) {
+        if let Err(e) = solver.solve(input, &mut out) {
             writer.error(&e)?;
         }
         Ok(())
@@ -160,16 +124,15 @@ impl Cmd {
         spec: &Spec,
         solver: &Solver,
         writer: &mut terminal_writer::TerminalWriter,
-        default_inputs: &impl input::Source,
+        input: &str,
     ) -> anyhow::Result<()> {
         let mut out = ProblemOutput::start(spec, writer)?;
         out.hide_solutions();
-        let input = default_inputs.get(spec).unwrap();
 
         let mut err = None;
         for i in 0.. {
             out.reset_timer();
-            if let Err(e) = solver.solve(&input, &mut out) {
+            if let Err(e) = solver.solve(input, &mut out) {
                 err = Some(e);
                 break;
             }
@@ -183,16 +146,18 @@ impl Cmd {
             return Ok(());
         }
         out.show_solutions()?;
+
+        // Warn about dropped time
         let total_time = out.total_time();
         let dropped_time = out.dropped_time();
         let dropped_percent = dropped_time.as_secs_f64()
             / (dropped_time.as_secs_f64() + total_time.as_secs_f64())
             * 100.0;
-        if dropped_percent > MAX_DROPPED_PERCENT * 100.0 {
-            println!(
+        if !self.quiet && dropped_percent > MAX_DROPPED_PERCENT * 100.0 {
+            writer.warn(&anyhow!(
                 "Warning: wasted {dropped_percent:.1}% of execution time \
                  (dropped={dropped_time:.1?}, useful={total_time:.1?})"
-            );
+            ))?;
         }
 
         Ok(())
@@ -201,9 +166,9 @@ impl Cmd {
 
 #[derive(Clone, Debug)]
 struct ProblemFilter {
-    raw: String,
+    pub raw: String,
 
-    year: u32,
+    year: Option<u32>,
     day: Option<u32>,
     variant: Option<String>,
 }
@@ -214,20 +179,40 @@ impl FromStr for ProblemFilter {
     fn from_str(mut s: &str) -> Result<Self, Self::Err> {
         let mut pf = ProblemFilter {
             raw: s.to_owned(),
-            year: 0,
+            year: None,
             day: None,
             variant: None,
         };
-        if let Some((rest, variant)) = s.split_once(':') {
-            s = rest;
-            pf.variant = Some(variant.to_owned());
+        let (raw_date, variant) = match s.split_once(':') {
+            Some((raw_date, variant)) => (raw_date, Some(variant.to_owned())),
+            None => (s, None),
+        };
+        pf.variant = variant;
+
+        if let Some((year, day)) = raw_date.split_once('.') {
+            if day != "*" {
+                pf.day = Some(day.parse().with_context(|| format!("invalid day: {day}"))?);
+            }
+            s = year;
+        } else {
+            s = raw_date;
         }
-        if let Some((rest, day)) = s.split_once('.') {
-            s = rest;
-            pf.day = Some(day.parse()?);
+        if s != "*" {
+            pf.year = Some(s.parse().with_context(|| format!("invalid year: {s}"))?);
         }
-        pf.year = s.parse()?;
+
         Ok(pf)
+    }
+}
+
+impl ProblemFilter {
+    pub fn matches_spec(&self, spec: &Spec) -> bool {
+        self.day.map_or(true, |day| day == spec.id.day)
+            && self.year.map_or(true, |year| year == spec.id.year)
+            && self
+                .variant
+                .as_ref()
+                .map_or(true, |variant| variant == &spec.variant)
     }
 }
 

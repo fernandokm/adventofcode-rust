@@ -40,6 +40,15 @@ impl TerminalWriter {
         stdout.reset()?;
         Ok(())
     }
+
+    pub fn warn(&self, msg: &dyn std::fmt::Debug) -> aoc::Result<()> {
+        let mut stdout = StandardStream::stdout(self.color_choice);
+        stdout.set_color(ColorSpec::new().set_fg(Some(Color::Yellow)))?;
+        Self::write(&mut stdout, &format!("{:?}", msg))?;
+        writeln!(stdout)?;
+        stdout.reset()?;
+        Ok(())
+    }
 }
 
 impl SolutionWriter for TerminalWriter {
@@ -82,14 +91,14 @@ impl SolutionWriter for TerminalWriter {
                 exec_time_std,
             } = stats;
             if let Some(exec_time_std) = exec_time_std {
-                let exec_count_s = exec_count.separate_with_underscores();
+                let exec_count = exec_count.separate_with_underscores();
                 #[allow(clippy::cast_precision_loss)]
                 let std_percent =
                     (exec_time_std.as_nanos() as f64) / (exec_time_mean.as_nanos() as f64) * 100.0;
                 writeln!(
                     stdout,
                     "(finished in {exec_time_mean:.1?} ± {exec_time_std:.1?} \
-                     (±{std_percent:.1}%), {exec_count_s} runs totaling {exec_time_total:.1?})"
+                     (±{std_percent:.1}%), {exec_time_total:.1?}/{exec_count} runs)"
                 )?;
             } else {
                 writeln!(stdout, "(finished in {exec_time_mean:.1?})")?;
