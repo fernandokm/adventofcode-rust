@@ -19,7 +19,7 @@ pub struct Cmd {
         short = 'n',
         long,
         help = "Run each solver at least this many times",
-        default_value = "1"
+        default_value = "0"
     )]
     min_runs: u64,
 
@@ -97,7 +97,7 @@ impl Cmd {
             quiet: self.quiet,
         };
 
-        if self.min_runs <= 1 {
+        if self.min_runs <= 1 && self.min_duration_s == Duration::ZERO {
             Self::run_solver_once(spec, solver, &mut writer, input)?;
         } else {
             self.run_solver_bench(spec, solver, &mut writer, input)?;
@@ -137,7 +137,7 @@ impl Cmd {
                 break;
             }
             let total_time = out.total_time();
-            if i >= self.min_runs - 1 && total_time >= self.min_duration_s {
+            if i >= self.min_runs.saturating_sub(1) && total_time >= self.min_duration_s {
                 break;
             }
         }
