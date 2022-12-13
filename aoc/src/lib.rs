@@ -10,12 +10,15 @@
 // TODO: enable docs in private items (uncomment the following line)
 // #![deny(clippy::missing_docs_in_private_items)]
 
-use std::fmt::{Display, Write};
+use std::{
+    fmt::{Display, Write},
+    time::Duration,
+};
 
 use input::Spec;
 use linkme::distributed_slice;
 use rustc_hash::FxHashMap;
-use stats::Stats;
+use stats::{Monitor, Stats};
 
 pub mod input;
 pub mod stats;
@@ -91,36 +94,66 @@ impl Display for Part {
     }
 }
 
-// TODO: do we need both lifetimes here?
 pub struct ProblemOutput<'a> {
     writer: &'a mut (dyn SolutionWriter + 'a),
-    monitor: stats::Monitor,
+    monitor: Monitor,
+    state: OutputState,
 }
 
 impl<'a> ProblemOutput<'a> {
     pub fn start(spec: &Spec, writer: &'a mut (impl SolutionWriter + 'a)) -> Result<Self> {
         writer.write_heading(spec)?;
-
-        let mut monitor = stats::Monitor::default();
-        monitor.reset();
-        Ok(Self { writer, monitor })
+        Ok(Self {
+            writer,
+            monitor: Monitor::new_at_current_instant(),
+            state: OutputState::Visible,
+        })
     }
 
-    #[must_use]
-    pub fn stats(&self, part: Part) -> Stats {
-        self.monitor.stats(part)
+    pub fn writer(&mut self) -> &mut dyn SolutionWriter {
+        self.writer
     }
 
     pub fn reset_timer(&mut self) {
         self.monitor.reset();
     }
 
+    #[must_use]
+    pub fn total_time(&self) -> Duration {
+        self.monitor.total_time()
+    }
+
+    #[must_use]
+    pub fn dropped_time(&self) -> Duration {
+        self.monitor.dropped_time()
+    }
+
+    pub fn hide_solutions(&mut self) {
+        if matches!(self.state, OutputState::Visible) {
+            self.state = OutputState::Hidden([None, None]);
+        }
+    }
+
+    pub fn show_solutions(&mut self) -> Result<()> {
+        if let OutputState::Hidden(solutions) = &self.state {
+            for part in [Part::One, Part::Two] {
+                if let Some(solution) = &solutions[part.to_index()] {
+                    let stats = &self.monitor.stats(part);
+                    self.writer.write_solution(part, stats, solution)?;
+                }
+            }
+        }
+        Ok(())
+    }
+
     fn try_set(&mut self, part: Part, solution: impl Display) -> Result<()> {
         self.monitor.finish(part);
-
-        let stats = self.monitor.stats(part);
-        self.writer.write_solution(part, &stats, &solution)?;
-
+        if let OutputState::Hidden(solutions) = &mut self.state {
+            solutions[part.to_index()] = Some(solution.to_string());
+        } else {
+            self.writer
+                .write_solution(part, &self.monitor.stats(part), &solution)?;
+        }
         self.monitor.reset();
         Ok(())
     }
@@ -136,39 +169,31 @@ impl<'a> ProblemOutput<'a> {
     }
 }
 
+enum OutputState {
+    Hidden([Option<String>; 2]),
+    Visible,
+}
+
 pub trait SolutionWriter {
     fn write_heading(&mut self, spec: &Spec) -> Result<()>;
-    fn write_solution(&mut self, part: Part, stats: &Stats, solution: &dyn Display) -> Result<()>;
+    fn write_solution(&mut self, part: Part, monitor: &Stats, solution: &dyn Display)
+    -> Result<()>;
 }
 
 #[derive(Debug, Clone, Default)]
-pub struct NullWriter {
-    pub heading: Option<Spec>,
-    pub solutions: [Option<(Stats, String)>; 2],
-}
-
-impl NullWriter {
-    pub fn pipe_to(&self, other: &mut impl SolutionWriter) -> Result<()> {
-        if let Some(heading) = &self.heading {
-            other.write_heading(heading)?;
-        }
-        for part in [Part::One, Part::Two] {
-            if let Some((stats, solution)) = &self.solutions[part.to_index()] {
-                other.write_solution(Part::One, stats, solution)?;
-            }
-        }
-        Ok(())
-    }
-}
+pub struct NullWriter;
 
 impl SolutionWriter for NullWriter {
-    fn write_heading(&mut self, spec: &Spec) -> Result<()> {
-        self.heading = Some(spec.clone());
+    fn write_heading(&mut self, _spec: &Spec) -> Result<()> {
         Ok(())
     }
 
-    fn write_solution(&mut self, part: Part, stats: &Stats, solution: &dyn Display) -> Result<()> {
-        self.solutions[part.to_index()] = Some((*stats, solution.to_string()));
+    fn write_solution(
+        &mut self,
+        _part: Part,
+        _stats: &Stats,
+        _solution: &dyn Display,
+    ) -> Result<()> {
         Ok(())
     }
 }

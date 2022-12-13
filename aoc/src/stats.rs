@@ -6,16 +6,31 @@ use crate::Part;
 pub struct Monitor {
     exec_times: [Vec<Duration>; 2],
     current: Option<Instant>,
+    total_time: Duration,
+    dropped_time: Duration,
 }
 
 impl Monitor {
+    #[must_use]
+    pub fn new_at_current_instant() -> Self {
+        Self {
+            current: Some(Instant::now()),
+            ..Default::default()
+        }
+    }
+
     pub fn reset(&mut self) {
-        self.current = Some(Instant::now());
+        let now = Instant::now();
+        if let Some(c) = self.current.replace(now) {
+            self.dropped_time += now.duration_since(c);
+        }
     }
 
     pub fn finish(&mut self, part: Part) {
         if let Some(t) = self.current.take() {
-            self.exec_times[part.to_index()].push(t.elapsed());
+            let elapsed = t.elapsed();
+            self.total_time += elapsed;
+            self.exec_times[part.to_index()].push(elapsed);
         } else {
             panic!("Nothing to finish");
         }
@@ -25,11 +40,22 @@ impl Monitor {
     pub fn stats(&self, part: Part) -> Stats {
         Stats::new(&self.exec_times[part.to_index()])
     }
+
+    #[must_use]
+    pub fn dropped_time(&self) -> Duration {
+        self.dropped_time
+    }
+
+    #[must_use]
+    pub fn total_time(&self) -> Duration {
+        self.total_time
+    }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Default)]
 pub struct Stats {
     pub exec_count: usize,
+    pub exec_time_total: Duration,
     pub exec_time_mean: Duration,
     pub exec_time_std: Option<Duration>,
 }
@@ -37,9 +63,10 @@ pub struct Stats {
 impl Stats {
     #[must_use]
     pub fn new(exec_times: &[Duration]) -> Self {
+        let start = Instant::now();
+        let exec_time_total = exec_times.iter().sum::<Duration>();
         #[allow(clippy::cast_possible_truncation)]
-        let exec_time_mean: Duration =
-            exec_times.iter().sum::<Duration>() / exec_times.len() as u32;
+        let exec_time_mean: Duration = exec_time_total / exec_times.len() as u32;
         let exec_time_err2_secs: f64 = exec_times
             .iter()
             .map(|d| (d.as_secs_f64() - exec_time_mean.as_secs_f64()).powi(2))
@@ -51,8 +78,10 @@ impl Stats {
             let secs = (exec_time_err2_secs / (exec_times.len() - 1) as f64).sqrt();
             Some(Duration::from_secs_f64(secs))
         };
+        println!("Stats creation took {:.1?}", start.elapsed());
         Self {
             exec_count: exec_times.len(),
+            exec_time_total,
             exec_time_mean,
             exec_time_std,
         }

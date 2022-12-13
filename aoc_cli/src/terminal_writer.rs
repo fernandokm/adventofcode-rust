@@ -77,6 +77,7 @@ impl SolutionWriter for TerminalWriter {
             stdout.set_color(ColorSpec::new().set_dimmed(true))?;
             let Stats {
                 exec_count,
+                exec_time_total,
                 exec_time_mean,
                 exec_time_std,
             } = stats;
@@ -85,12 +86,10 @@ impl SolutionWriter for TerminalWriter {
                 #[allow(clippy::cast_precision_loss)]
                 let std_percent =
                     (exec_time_std.as_nanos() as f64) / (exec_time_mean.as_nanos() as f64) * 100.0;
-                #[allow(clippy::cast_possible_truncation)]
-                let total_time = *exec_time_mean * (*exec_count as u32);
                 writeln!(
                     stdout,
                     "(finished in {exec_time_mean:.1?} ± {exec_time_std:.1?} \
-                     (±{std_percent:.1}%), {exec_count_s} runs totaling {total_time:.1?})"
+                     (±{std_percent:.1}%), {exec_count_s} runs totaling {exec_time_total:.1?})"
                 )?;
             } else {
                 writeln!(stdout, "(finished in {exec_time_mean:.1?})")?;

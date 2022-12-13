@@ -2,12 +2,14 @@ use std::{str::FromStr, time::Duration};
 
 use aoc::{
     input::{self, Spec},
-    NullWriter, Part, ProblemId, ProblemOutput, Solver,
+    ProblemId, ProblemOutput, Solver,
 };
 use clap::Args;
 use itertools::Itertools;
 
 use crate::terminal_writer;
+
+const MAX_DROPPED_PERCENT: f64 = 0.05;
 
 #[derive(Debug, Args)]
 pub struct Cmd {
@@ -160,22 +162,39 @@ impl Cmd {
         writer: &mut terminal_writer::TerminalWriter,
         default_inputs: &impl input::Source,
     ) -> anyhow::Result<()> {
-        let mut null_writer = NullWriter::default();
-        let mut out = ProblemOutput::start(spec, &mut null_writer)?;
+        let mut out = ProblemOutput::start(spec, writer)?;
+        out.hide_solutions();
         let input = default_inputs.get(spec).unwrap();
 
+        let mut err = None;
         for i in 0.. {
             out.reset_timer();
             if let Err(e) = solver.solve(&input, &mut out) {
-                writer.error(&e)?;
+                err = Some(e);
                 break;
             }
-            let total_time = out.stats(Part::One).total_time() + out.stats(Part::Two).total_time();
+            let total_time = out.total_time();
             if i >= self.min_runs - 1 && total_time >= self.min_duration_s {
                 break;
             }
         }
-        null_writer.pipe_to(writer)?;
+        if let Some(err) = err {
+            writer.error(&err)?;
+            return Ok(());
+        }
+        out.show_solutions()?;
+        let total_time = out.total_time();
+        let dropped_time = out.dropped_time();
+        let dropped_percent = dropped_time.as_secs_f64()
+            / (dropped_time.as_secs_f64() + total_time.as_secs_f64())
+            * 100.0;
+        if dropped_percent > MAX_DROPPED_PERCENT * 100.0 {
+            println!(
+                "Warning: wasted {dropped_percent:.1}% of execution time \
+                 (dropped={dropped_time:.1?}, useful={total_time:.1?})"
+            );
+        }
+
         Ok(())
     }
 }
