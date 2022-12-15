@@ -288,3 +288,9 @@ Problem 2022.7 (real)
 Problem 2022.7 (test)
     [part 1] 95437
     [part 2] 24933642
+Problem 2022.8 (real)
+    [part 1] 1829
+    [part 2] 291840
+Problem 2022.8 (test)
+    [part 1] 21
+    [part 2] 8
