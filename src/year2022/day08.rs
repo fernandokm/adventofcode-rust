@@ -40,7 +40,7 @@ fn viewing_distance(
 ) -> (u64, bool) {
     let mut count = 0;
     let P2(i0, j0) = pos;
-    for P2(i, j) in grid_spec.step_to_end(pos, &d).skip(1) {
+    for P2(i, j) in grid_spec.iter_direction(pos, &d).skip(1) {
         count += 1;
         if grid[i][j] >= grid[i0][j0] {
             return (count, false);

@@ -4,6 +4,8 @@ use aoc::ProblemOutput;
 use itertools::Itertools;
 use ndarray::{Array2, ArrayView2, ArrayViewMut2, Axis};
 
+use crate::util::grid::GridSpec;
+
 aoc::register!(solve, 2021, 15);
 
 pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
@@ -49,6 +51,7 @@ fn repeat_map_incresing_risk(
 }
 
 fn djikstra(mut map: ArrayViewMut2<'_, Node>, start: (usize, usize), end: (usize, usize)) {
+    let grid_spec = GridSpec::new_indexed(map.dim().0, map.dim().1);
     let mut tentative_total_risks: BinaryHeap<_> = map
         .indexed_iter()
         .map(|(pos, _)| (Reverse(u32::MAX), pos))
@@ -56,28 +59,23 @@ fn djikstra(mut map: ArrayViewMut2<'_, Node>, start: (usize, usize), end: (usize
     tentative_total_risks.push((Reverse(0), start));
 
     while let Some((Reverse(total_risk), pos)) = tentative_total_risks.pop() {
-        if !map[pos].is_tentative {
+        let node = &mut map[pos];
+        if !node.is_tentative {
             continue;
         }
-        map[pos].total_risk = total_risk;
-        map[pos].is_tentative = false;
+        node.total_risk = total_risk;
+        node.is_tentative = false;
         if pos == end {
             return;
         }
-        let neighbors_pos = [
-            (pos.0.wrapping_sub(1), pos.1),
-            (pos.0 + 1, pos.1),
-            (pos.0, pos.1.wrapping_sub(1)),
-            (pos.0, pos.1 + 1),
-        ];
-        for pos2 in neighbors_pos {
-            if map.get(pos2).is_none() {
-                continue;
-            }
-            let total_risk2 = map[pos].total_risk + map[pos2].risk;
-            if map[pos2].is_tentative && total_risk2 < map[pos2].total_risk {
-                map[pos2].total_risk = total_risk2;
-                tentative_total_risks.push((Reverse(total_risk2), pos2));
+        let node_risk = node.total_risk;
+
+        for pos2 in grid_spec.neighbors(&pos.into()) {
+            let node2 = &mut map[pos2.into_tuple()];
+            let total_risk2 = node_risk + node2.risk;
+            if node2.is_tentative && total_risk2 < node2.total_risk {
+                node2.total_risk = total_risk2;
+                tentative_total_risks.push((Reverse(total_risk2), pos2.into_tuple()));
             }
         }
     }

@@ -1,5 +1,6 @@
 use aoc::ProblemOutput;
-use itertools::Itertools;
+
+use crate::util::{coords::P2, grid::GridSpec};
 
 aoc::register!(solve, 2020, 11);
 
@@ -52,29 +53,17 @@ pub fn update(seats: &mut Vec<Vec<char>>, aux: &mut [Vec<char>], part1: bool) ->
 }
 
 fn count_occupied_neighbors(i: usize, j: usize, part1: bool, seats: &[Vec<char>]) -> usize {
-    let minus1 = 0usize.overflowing_sub(1).0;
-
-    [minus1, 0, 1]
-        .into_iter()
-        .cartesian_product([minus1, 0, 1].into_iter())
-        .filter(|&(di, dj)| {
-            if di == 0 && dj == 0 {
-                return false;
-            }
-            let mut i = i.overflowing_add(di).0;
-            let mut j = j.overflowing_add(dj).0;
-            if !part1 {
-                // in part 2, consider the first seat (not neighbor) in each direction
-                while get(seats, i, j).map_or(false, |c| c == '.') {
-                    i = i.overflowing_add(di).0;
-                    j = j.overflowing_add(dj).0;
-                }
-            }
-            get(seats, i, j).map_or(false, |c| c == '#')
+    let spec = GridSpec::new_indexed(seats.len(), seats[0].len());
+    GridSpec::directions_with_diag()
+        .filter(|dir| {
+            spec.iter_direction(P2(i, j), dir)
+                .skip(1) // skip the node at (i, j)
+                .map(|P2(ii, jj)| seats[ii][jj])
+                .find(|&c| {
+                    // in part 2, consider the first seat (not neighbor) in each direction
+                    part1 || (c != '.')
+                })
+                .map_or(false, |c: char| c == '#')
         })
         .count()
-}
-
-fn get(seats: &[Vec<char>], i: usize, j: usize) -> Option<char> {
-    seats.get(i).and_then(|row| row.get(j).copied())
 }

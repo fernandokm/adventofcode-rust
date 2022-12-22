@@ -28,6 +28,16 @@ impl<T> P2<T> {
             self.1.checked_add_signed(&rhs.1)?,
         ))
     }
+
+    #[must_use]
+    pub fn as_tuple(&self) -> (&T, &T) {
+        (&self.0, &self.1)
+    }
+
+    #[must_use]
+    pub fn into_tuple(self) -> (T, T) {
+        (self.0, self.1)
+    }
 }
 
 impl<T> P2<Signed<T>> {
@@ -45,6 +55,18 @@ impl<T> P2<Signed<T>> {
                 Signed::Negative(v) => -v,
             },
         )
+    }
+}
+
+impl<T> From<(T, T)> for P2<T> {
+    fn from((x, y): (T, T)) -> Self {
+        P2(x, y)
+    }
+}
+
+impl<T> From<P2<T>> for (T, T) {
+    fn from(point: P2<T>) -> Self {
+        point.into_tuple()
     }
 }
 

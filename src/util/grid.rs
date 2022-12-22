@@ -45,33 +45,45 @@ where
         }
     }
 
-    #[must_use]
-    pub fn directions_arr() -> [P2<Signed<T>>; 4] {
+    pub fn directions() -> impl Iterator<Item = P2<Signed<T>>> {
         [
             P2(Signed::one(), Signed::zero()),
             P2(Signed::zero(), Signed::one()),
             P2(-Signed::one(), Signed::zero()),
             P2(Signed::zero(), -Signed::one()),
         ]
+        .into_iter()
     }
 
-    pub fn directions() -> impl Iterator<Item = P2<Signed<T>>> {
-        Self::directions_arr().into_iter()
+    pub fn directions_with_diag() -> impl Iterator<Item = P2<Signed<T>>> {
+        Self::directions().chain(
+            [
+                P2(Signed::one(), Signed::one()),
+                P2(Signed::one(), -Signed::one()),
+                P2(-Signed::one(), Signed::one()),
+                P2(-Signed::one(), -Signed::one()),
+            ]
+            .into_iter(),
+        )
     }
 
     pub fn neighbors<'a>(&'a self, point: &'a P2<T>) -> impl 'a + Iterator<Item = P2<T>> {
-        Self::directions().filter_map(|offset| self.step(point, &offset))
+        Self::directions().filter_map(|dir| self.step(point, &dir))
     }
 
-    pub fn step_to_end<'a>(
+    pub fn neighbors_with_diag<'a>(&'a self, point: &'a P2<T>) -> impl 'a + Iterator<Item = P2<T>> {
+        Self::directions_with_diag().filter_map(|dir| self.step(point, &dir))
+    }
+
+    pub fn iter_direction<'a>(
         &'a self,
         point: P2<T>,
-        step_by: impl 'a + Borrow<P2<Signed<T>>>,
+        direction: impl 'a + Borrow<P2<Signed<T>>>,
     ) -> impl 'a + Iterator<Item = P2<T>> {
         let mut next_point = Some(point);
         std::iter::from_fn(move || {
             let result = next_point.take()?;
-            next_point = self.step(&result, step_by.borrow());
+            next_point = self.step(&result, direction.borrow());
             Some(result)
         })
     }
@@ -90,8 +102,8 @@ where
         let step_by_0 = P2(Signed::one(), Signed::zero());
         let step_by_1 = P2(Signed::zero(), Signed::one());
 
-        self.step_to_end(P2(start_0, start_1), step_by_0)
-            .flat_map(move |p| self.step_to_end(p, step_by_1.clone()))
+        self.iter_direction(P2(start_0, start_1), step_by_0)
+            .flat_map(move |p| self.iter_direction(p, step_by_1.clone()))
             .take_while(move |_| should_iter)
     }
 }

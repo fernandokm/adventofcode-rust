@@ -2,6 +2,8 @@ use aoc::ProblemOutput;
 use ndarray::Array2;
 use rustc_hash::FxHashSet;
 
+use crate::util::{coords::P2, grid::GridSpec};
+
 aoc::register!(solve, 2021, 11);
 
 pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
@@ -39,16 +41,12 @@ fn flash(i: usize, j: usize, energy: &mut Array2<u32>, flashes: &mut FxHashSet<(
     if !flashes.insert((i, j)) {
         return;
     }
-    for ii in [i.wrapping_sub(1), i, i + 1] {
-        for jj in [j.wrapping_sub(1), j, j + 1] {
-            if ii == i && jj == j {
-                continue;
-            }
-            if let Some(e) = energy.get_mut((ii, jj)) {
-                *e += 1;
-                if *e >= 10 {
-                    flash(ii, jj, energy, flashes);
-                }
+    let grid_spec = GridSpec::new_indexed(energy.dim().0, energy.dim().1);
+    for P2(ii, jj) in grid_spec.neighbors_with_diag(&P2(i, j)) {
+        if let Some(e) = energy.get_mut((ii, jj)) {
+            *e += 1;
+            if *e >= 10 {
+                flash(ii, jj, energy, flashes);
             }
         }
     }
