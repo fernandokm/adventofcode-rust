@@ -3,6 +3,8 @@ use std::collections::BTreeSet;
 use aoc::ProblemOutput;
 use itertools::Itertools;
 
+use crate::util::{coords::P2, grid::GridSpec};
+
 aoc::register!(solve, 2021, 9);
 
 pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
@@ -11,10 +13,16 @@ pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
         .lines()
         .map(|line| line.bytes().map(|c| Point::new(c - b'0')).collect())
         .collect();
+    let grid_spec = GridSpec::new_indexed(grid.len(), grid[0].len());
 
-    let low_points = enumerate_grid(&grid)
-        .filter(|&((i, j), pt)| neighbors(&grid, (i, j)).all(|npt| npt.height > pt.height))
-        .map(|((i, j), _)| (i, j))
+    let low_points = grid_spec
+        .iter()
+        .filter(|&P2(i, j)| {
+            grid_spec
+                .neighbors(&P2(i, j))
+                .all(|P2(ii, jj)| grid[ii][jj].height > grid[i][j].height)
+        })
+        .map(|P2(i, j)| (i, j))
         .collect_vec();
 
     out.set_part1(
@@ -26,7 +34,7 @@ pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
 
     for (i, j) in low_points {
         grid[i][j].low_points.insert((i, j));
-        propagate_low_point(&mut grid, i, j);
+        propagate_low_point(&grid_spec, &mut grid, i, j);
     }
 
     out.set_part2(
@@ -44,45 +52,20 @@ pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn propagate_low_point(grid: &mut [Vec<Point>], i: usize, j: usize) {
+fn propagate_low_point(grid_spec: &GridSpec<usize>, grid: &mut [Vec<Point>], i: usize, j: usize) {
     let low_points = grid[i][j].low_points.clone();
     let height = grid[i][j].height;
-    for (ni, nj) in neighbor_coords(i, j) {
-        if let Some(pt) = grid.get_mut(ni).and_then(|row| row.get_mut(nj)) {
-            if pt.height < height || pt.height == 9 {
-                continue;
-            }
-            let old_size = pt.low_points.len();
-            pt.low_points.extend(low_points.iter());
-            if pt.low_points.len() > old_size {
-                propagate_low_point(grid, ni, nj);
-            }
+    for P2(ni, nj) in grid_spec.neighbors(&P2(i, j)) {
+        let pt = &mut grid[ni][nj];
+        if pt.height < height || pt.height == 9 {
+            continue;
+        }
+        let old_size = pt.low_points.len();
+        pt.low_points.extend(low_points.iter());
+        if pt.low_points.len() > old_size {
+            propagate_low_point(grid_spec, grid, ni, nj);
         }
     }
-}
-
-fn enumerate_grid<T>(grid: &[Vec<T>]) -> impl Iterator<Item = ((usize, usize), &T)> {
-    grid.iter()
-        .enumerate()
-        .flat_map(|(i, row)| row.iter().enumerate().map(move |(j, val)| ((i, j), val)))
-}
-
-fn neighbor_coords(i: usize, j: usize) -> impl Iterator<Item = (usize, usize)> {
-    let minus1 = 0usize.wrapping_sub(1);
-    [(0, 1), (0, minus1), (1, 0), (minus1, 0)]
-        .into_iter()
-        .map(move |(di, dj)| (i.wrapping_add(di), j.wrapping_add(dj)))
-}
-
-fn get<T>(grid: &[Vec<T>], (i, j): (usize, usize)) -> Option<&T> {
-    grid.get(i).and_then(|row| row.get(j))
-}
-
-fn neighbors<T>(grid: &[Vec<T>], (i, j): (usize, usize)) -> impl Iterator<Item = &T> {
-    let minus1 = 0usize.wrapping_sub(1);
-    [(0, 1), (0, minus1), (1, 0), (minus1, 0)]
-        .into_iter()
-        .filter_map(move |(di, dj)| get(grid, (i.wrapping_add(di), j.wrapping_add(dj))))
 }
 
 struct Point {

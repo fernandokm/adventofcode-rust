@@ -1,30 +1,28 @@
 use aoc::ProblemOutput;
-use itertools::Itertools;
+
+use crate::util::{coords::P2, grid::GridSpec, signed::Signed};
 
 aoc::register!(solve, 2022, 8);
 
-type P2 = (usize, usize);
-
 pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     let grid: Vec<&[u8]> = input.lines().map(str::as_bytes).collect();
-    let grid_size = (grid.len(), grid[0].len());
-    let grid_positions = (0..grid_size.0).cartesian_product(0..grid_size.1);
+    let grid_spec = GridSpec::new_indexed(grid.len(), grid[0].len());
 
     out.set_part1(
-        grid_positions
-            .clone()
+        grid_spec
+            .iter()
             .filter(|&pos| {
-                Direction::variants()
-                    .any(|d| matches!(d.viewing_distance(pos, &grid), ViewingDistance::Visible(_)))
+                GridSpec::directions().any(|d| viewing_distance(grid_spec, &grid, pos, d).1)
             })
             .count(),
     );
 
     out.set_part2(
-        grid_positions
+        grid_spec
+            .iter()
             .map(|pos| {
-                Direction::variants()
-                    .map(|d| d.viewing_distance(pos, &grid).as_u64())
+                GridSpec::directions()
+                    .map(|d| viewing_distance(grid_spec, &grid, pos, d).0)
                     .product::<u64>()
             })
             .max()
@@ -34,55 +32,19 @@ pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
     Ok(())
 }
 
-#[derive(Debug, Clone, Copy)]
-enum Direction {
-    Up,
-    Down,
-    Left,
-    Right,
-}
-
-impl Direction {
-    fn variants() -> impl Iterator<Item = Direction> {
-        [Self::Up, Self::Down, Self::Left, Self::Right].into_iter()
-    }
-
-    fn viewing_distance(self, (i, j): P2, grid: &[&[u8]]) -> ViewingDistance {
-        let mut count = 0;
-        for (ii, jj) in self.iter_to_end((i, j), (grid.len(), grid[0].len())) {
-            if grid[ii][jj] >= grid[i][j] {
-                return ViewingDistance::Hidden(count + 1);
-            }
-            count += 1;
-        }
-        ViewingDistance::Visible(count)
-    }
-
-    fn iter_to_end(self, pos: P2, grid_size: P2) -> impl Iterator<Item = P2> {
-        let (mut i, mut j) = pos;
-        std::iter::from_fn(move || {
-            (i, j) = match self {
-                Direction::Up => (i.checked_sub(1)?, j),
-                Direction::Left => (i, j.checked_sub(1)?),
-                Direction::Down if i + 1 < grid_size.0 => (i + 1, j),
-                Direction::Right if j + 1 < grid_size.1 => (i, j + 1),
-                _ => return None,
-            };
-            Some((i, j))
-        })
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-enum ViewingDistance {
-    Visible(u64),
-    Hidden(u64),
-}
-
-impl ViewingDistance {
-    fn as_u64(self) -> u64 {
-        match self {
-            ViewingDistance::Visible(d) | ViewingDistance::Hidden(d) => d,
+fn viewing_distance(
+    grid_spec: GridSpec<usize>,
+    grid: &[&[u8]],
+    pos: P2<usize>,
+    d: P2<Signed<usize>>,
+) -> (u64, bool) {
+    let mut count = 0;
+    let P2(i0, j0) = pos;
+    for P2(i, j) in grid_spec.step_to_end(pos, &d).skip(1) {
+        count += 1;
+        if grid[i][j] >= grid[i0][j0] {
+            return (count, false);
         }
     }
+    (count, true)
 }

@@ -21,6 +21,7 @@ rustc-hash = "1.1.0"
 ndarray = "0.15.4"
 thiserror = "1.0.30"
 tinyvec = "1.5.1"
+num-traits = { version = "0.2.15" }
 
 [workspace]
 members = [

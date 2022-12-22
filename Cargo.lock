@@ -13,6 +13,7 @@ dependencies = [
  "lazy_static",
  "linkme",
  "ndarray",
+ "num-traits",
  "paste",
  "regex",
  "rust-embed",
