@@ -11,7 +11,7 @@ use super::signed::{Signed, SignedExt};
 pub struct P2<T>(pub T, pub T);
 
 impl<T> P2<T> {
-    pub fn abs(&self) -> T
+    pub fn norm_l2_squared(&self) -> T
     where
         T: Clone + Add<Output = T> + Mul<Output = T>,
     {
@@ -293,7 +293,7 @@ where
     type Output = P2<T>;
 
     fn div(self, rhs: P2<T>) -> Self::Output {
-        let denom = rhs.abs();
+        let denom = rhs.norm_l2_squared();
         P2(
             (self.0.clone() * rhs.0.clone() + self.1.clone() * rhs.1.clone()) / denom.clone(),
             (self.1.clone() * rhs.0.clone() - self.0 * rhs.1) / denom,
