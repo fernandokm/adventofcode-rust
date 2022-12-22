@@ -65,7 +65,7 @@ pub struct ProblemId {
 
 impl Display for ProblemId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "{}.{}", self.year, self.day)
+        write!(f, "{}.{}", self.year, self.day)
     }
 }
 
