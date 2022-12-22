@@ -294,3 +294,12 @@ Problem 2022.8 (real)
 Problem 2022.8 (test)
     [part 1] 21
     [part 2] 8
+Problem 2022.9 (real)
+    [part 1] 5960
+    [part 2] 2327
+Problem 2022.9 (test1)
+    [part 1] 13
+    [part 2] 1
+Problem 2022.9 (test2)
+    [part 1] 88
+    [part 2] 36
