@@ -84,7 +84,8 @@ impl Cmd {
             .collect_vec();
         if !not_useful.is_empty() {
             println!(
-                "Warning: the following filters didn't match any problems:\n  {}",
+                "Warning: the following filters didn't match any problems (or there were no \
+                 inputs available):\n  {}",
                 not_useful.into_iter().join("\n  ")
             );
         }
