@@ -1,5 +1,6 @@
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
+use ndarray::{Dim, NdIndex};
 use num_traits::{
     CheckedAdd, CheckedDiv, CheckedMul, CheckedSub, SaturatingAdd, SaturatingSub, WrappingAdd,
     WrappingSub,
@@ -329,5 +330,17 @@ where
             T::checked_sub(&self.1.checked_mul(&rhs.0)?, &self.0.checked_mul(&rhs.1)?)?
                 .checked_div(&denom)?,
         ))
+    }
+}
+
+// SAFETY: this trait implementation delegates imediately to the trait
+// implementation for (usize, usize)
+unsafe impl NdIndex<Dim<[usize; 2]>> for P2<usize> {
+    fn index_checked(&self, dim: &Dim<[usize; 2]>, strides: &Dim<[usize; 2]>) -> Option<isize> {
+        self.into_tuple().index_checked(dim, strides)
+    }
+
+    fn index_unchecked(&self, strides: &Dim<[usize; 2]>) -> isize {
+        self.into_tuple().index_unchecked(strides)
     }
 }
