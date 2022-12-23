@@ -98,6 +98,7 @@ pub struct ProblemOutput<'a> {
     writer: &'a mut (dyn SolutionWriter + 'a),
     monitor: Monitor,
     state: OutputState,
+    variant: String,
 }
 
 impl<'a> ProblemOutput<'a> {
@@ -107,7 +108,13 @@ impl<'a> ProblemOutput<'a> {
             writer,
             monitor: Monitor::new_at_current_instant(),
             state: OutputState::Visible,
+            variant: spec.variant.clone(),
         })
+    }
+
+    #[must_use]
+    pub fn variant(&self) -> &str {
+        &self.variant
     }
 
     pub fn writer(&mut self) -> &mut dyn SolutionWriter {

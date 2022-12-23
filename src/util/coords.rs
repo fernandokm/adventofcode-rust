@@ -3,7 +3,7 @@ use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssi
 use ndarray::{Dim, NdIndex};
 use num_traits::{
     CheckedAdd, CheckedDiv, CheckedMul, CheckedSub, SaturatingAdd, SaturatingSub, WrappingAdd,
-    WrappingSub,
+    WrappingSub, Zero,
 };
 
 use super::signed::{Signed, SignedExt};
@@ -12,6 +12,17 @@ use super::signed::{Signed, SignedExt};
 pub struct P2<T>(pub T, pub T);
 
 impl<T> P2<T> {
+    #[must_use]
+    pub fn norm_l1(&self) -> T
+    where
+        T: Clone + Zero + Sub<Output = T> + PartialOrd,
+    {
+        // We required Sub instead of Neg in order to support unsigned types as well
+        let abs = |v: T| if v >= T::zero() { v } else { T::zero() - v };
+        abs(self.0.clone()) + abs(self.1.clone())
+    }
+
+    #[must_use]
     pub fn norm_l2_squared(&self) -> T
     where
         T: Clone + Add<Output = T> + Mul<Output = T>,
