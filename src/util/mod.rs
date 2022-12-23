@@ -3,3 +3,4 @@ pub mod err;
 pub mod grid;
 pub mod math;
 pub mod signed;
+pub mod iter;

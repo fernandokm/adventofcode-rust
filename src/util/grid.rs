@@ -35,10 +35,15 @@ where
     T: Clone + Zero + One + CheckedAdd + CheckedSub + PartialOrd,
 {
     #[must_use]
+    pub fn contains(&self, point: &P2<T>) -> bool {
+        self.range_0.contains(&point.0) && self.range_1.contains(&point.1)
+    }
+
+    #[must_use]
     pub fn step(&self, point: &P2<T>, step_by: &P2<Signed<T>>) -> Option<P2<T>> {
         let result = point.checked_add_signed(step_by)?;
 
-        if self.range_0.contains(&result.0) && self.range_1.contains(&result.1) {
+        if self.contains(&result) {
             Some(result)
         } else {
             None
@@ -75,6 +80,7 @@ where
         Self::directions_with_diag().filter_map(|dir| self.step(point, &dir))
     }
 
+    //TODO: this is wrong and never stops iterating
     pub fn iter_direction<'a>(
         &'a self,
         point: P2<T>,

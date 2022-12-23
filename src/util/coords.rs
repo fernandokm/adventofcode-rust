@@ -39,6 +39,11 @@ impl<T> P2<T> {
     pub fn into_tuple(self) -> (T, T) {
         (self.0, self.1)
     }
+
+    #[must_use]
+    pub fn into_signed(self) -> P2<Signed<T>> {
+        P2(self.0.into(), self.1.into())
+    }
 }
 
 impl<T> P2<Signed<T>> {
@@ -56,6 +61,12 @@ impl<T> P2<Signed<T>> {
                 Signed::Negative(v) => -v,
             },
         )
+    }
+}
+
+impl<T> From<P2<T>> for P2<Signed<T>> {
+    fn from(point: P2<T>) -> Self {
+        point.into_signed()
     }
 }
 
@@ -120,10 +131,14 @@ pub mod ij {
     use crate::util::signed::Signed;
 
     impl_direction!(
-        left | west => (0, -1),
-        right | east => (0, 1),
         up | north => (-1, 0),
+        upleft | northwest => (-1, -1),
+        left | west => (0, -1),
+        downleft | southwest => (1, -1),
         down | south => (1, 0),
+        downright | southeast => (1, 1),
+        right | east => (0, 1),
+        upright | northeast => (-1, 1),
         right_turn => (0, -1),
         left_turn  => (0, 1),
     );
@@ -138,10 +153,14 @@ pub mod xy {
     use crate::util::signed::Signed;
 
     impl_direction!(
-        left | west => (-1, 0),
-        right | east => (1, 0),
         up | north => (0, 1),
+        upleft | northwest => (-1, 1),
+        left | west => (-1, 0),
+        downleft | southwest => (-1, -1),
         down | south => (0, -1),
+        downright | southeast => (1, -1),
+        right | east => (1, 0),
+        upright | northeast => (1, 1),
         right_turn => (0, -1),
         left_turn  => (0, 1),
     );

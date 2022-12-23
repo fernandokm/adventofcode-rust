@@ -339,3 +339,9 @@ Problem 2022.13 (real)
 Problem 2022.13 (test)
     [part 1] 13
     [part 2] 140
+Problem 2022.14 (real)
+    [part 1] 638
+    [part 2] 31722
+Problem 2022.14 (test)
+    [part 1] 24
+    [part 2] 93
