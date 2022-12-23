@@ -28,3 +28,6 @@ save: build-release
 bench: build-release
   {{bin_release}} run '*:real' --min-runs 5 --min-duration-s 1 --color=always | \
     {{scripts}}/tee-uncolored.sh bench.txt
+
+list: build-dev
+  {{bin_dev}} list
