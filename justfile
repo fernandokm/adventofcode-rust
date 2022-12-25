@@ -26,6 +26,9 @@ save: build-release
   git --no-pager diff --color=always --unified=2 {{output}} | tail -n+6
 
 bench: build-release
+  {{bin_release}} run "$({{scripts}}/get-latest-solution.sh):real" --min-runs 5 --min-duration-s 1 --color=always
+
+bench-all: build-release
   {{bin_release}} run '*:real' --min-runs 5 --min-duration-s 1 --color=always | \
     {{scripts}}/tee-uncolored.sh bench.txt
 
