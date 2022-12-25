@@ -1,4 +1,4 @@
-use std::collections::VecDeque;
+use std::{cmp::Reverse, collections::VecDeque};
 
 use anyhow::anyhow;
 use aoc::ProblemOutput;
@@ -65,56 +65,73 @@ fn remove_useless_valves(valves: &mut Vec<Valve>) {
 #[derive(Debug, Clone)]
 struct Optimizer<'a, const N: usize> {
     valves: &'a [Valve],
-    is_open: Vec<bool>,
+    is_closed: Vec<bool>,
     valve_idxs: [usize; N],
     time: [u32; N],
+    valve_idxs_by_rev_flow_rate: Vec<usize>,
     pressure_released: u32,
     lower_bound: u32,
-    remaining_flow_rate: u32,
     time_limit: u32,
+    remaining_valves: usize,
 }
 
 impl<'a, const N: usize> Optimizer<'a, N> {
     fn new(valves: &'a [Valve], time_limit: u32) -> Self {
         Self {
             valves,
-            is_open: valves.iter().map(|v| v.flow_rate == 0).collect(),
+            is_closed: valves.iter().map(|v| v.flow_rate == 0).collect(),
             valve_idxs: [0; N],
             time: [0; N],
+            valve_idxs_by_rev_flow_rate: (0..valves.len())
+                .sorted_unstable_by_key(|&i| Reverse(valves[i].flow_rate))
+                .collect(),
             pressure_released: 0,
             lower_bound: 0,
-            remaining_flow_rate: valves.iter().map(|v| v.flow_rate).sum(),
             time_limit,
+            remaining_valves: valves.iter().filter(|v| v.flow_rate != 0).count(),
         }
     }
 
     fn compute_upper_bound(&self) -> u32 {
-        let t = self.time.into_iter().min().unwrap();
-        self.pressure_released + self.remaining_flow_rate * self.time_limit.saturating_sub(t + 1)
+        // Specializing the computation of t for the cases N == 1 and N == 2
+        // (which are the cases we care about) leads to a significant speedup
+        let t = match N {
+            1 => self.time[0],
+            2 => self.time[0].min(self.time[1]),
+            _ => self.time.into_iter().min().unwrap(),
+        };
+        let mut remaining_time = self.time_limit.saturating_sub(t + 1);
+        let mut max_possible_extra_pressure = 0;
+        for &valve_idx in &self.valve_idxs_by_rev_flow_rate {
+            if self.is_closed[valve_idx] {
+                continue;
+            }
+            max_possible_extra_pressure += self.valves[valve_idx].flow_rate * remaining_time;
+            if let Some(t) = remaining_time.checked_sub(2) {
+                remaining_time = t;
+            } else {
+                break;
+            }
+        }
+        self.pressure_released + max_possible_extra_pressure
     }
 
     fn optimize(&mut self) -> u32 {
         let i = self.time.iter().position_min().unwrap();
         if self.time[i] >= self.time_limit
-            || self.compute_upper_bound() < self.lower_bound
-            || self.remaining_flow_rate == 0
+            || self.compute_upper_bound() <= self.lower_bound
+            || self.remaining_valves == 0
         {
             return self.pressure_released;
         }
 
-        self.valves[self.valve_idxs[i]]
-            .dist
-            .iter()
-            .enumerate()
-            .filter_map(|(valve_idx, _)| {
-                if self.is_open[valve_idx] {
-                    None
-                } else {
-                    Some(self.recurse_with_valve(i, valve_idx))
-                }
-            })
-            .max()
-            .unwrap_or_default()
+        let mut max = 0;
+        for valve_idx in 0..self.valves[self.valve_idxs[i]].dist.len() {
+            if !self.is_closed[valve_idx] {
+                max = max.max(self.recurse_with_valve(i, valve_idx));
+            }
+        }
+        max
     }
 
     fn recurse_with_valve(&mut self, i: usize, valve_idx: usize) -> u32 {
@@ -127,8 +144,8 @@ impl<'a, const N: usize> Optimizer<'a, N> {
 
         // Open valve
         self.time[i] += time_spent;
-        self.is_open[valve_idx] = true;
-        self.remaining_flow_rate -= flow_rate;
+        self.is_closed[valve_idx] = true;
+        self.remaining_valves -= 1;
         self.pressure_released += total_valve_pressure;
         self.valve_idxs[i] = valve_idx;
 
@@ -137,9 +154,9 @@ impl<'a, const N: usize> Optimizer<'a, N> {
         self.lower_bound = self.lower_bound.max(pressure);
 
         // Close valve
-        self.is_open[valve_idx] = false;
+        self.is_closed[valve_idx] = false;
         self.time[i] -= time_spent;
-        self.remaining_flow_rate += flow_rate;
+        self.remaining_valves += 1;
         self.pressure_released -= total_valve_pressure;
         self.valve_idxs[i] = old_valve_idx;
 
