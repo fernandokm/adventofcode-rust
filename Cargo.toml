@@ -5,7 +5,8 @@ authors = ["Fernando Matsumoto <ferkmatsumoto@gmail.com>"]
 edition = "2021"
 
 [profile.release]
-debug = true
+debug = 1
+incremental = true
 
 [dependencies]
 aoc = { path = "aoc" }
