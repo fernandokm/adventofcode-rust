@@ -369,3 +369,7 @@ Problem 2022.18 (real)
 Problem 2022.18 (test)
     [part 1] 64
     [part 2] 58
+Problem 2022.25 (real)
+    [part 1] 2---1010-0=1220-=010
+Problem 2022.25 (test)
+    [part 1] 2=-1=0

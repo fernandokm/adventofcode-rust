@@ -5,6 +5,7 @@
     clippy::cast_lossless,
     clippy::cast_possible_truncation,
     clippy::cast_possible_wrap,
+    clippy::cast_sign_loss,
     clippy::match_on_vec_items,
     clippy::similar_names
 )]
