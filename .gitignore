@@ -1,2 +1,4 @@
 /target
 /bench.txt
+/perf.*
+/flamegraph.svg
