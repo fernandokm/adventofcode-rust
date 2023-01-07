@@ -4,7 +4,7 @@ use anyhow::Context;
 use aoc::ProblemOutput;
 use itertools::Itertools;
 
-use crate::util::err::NONE_ERR;
+use crate::util::err::NoneErr;
 
 aoc::register!(solve, 2020, 16);
 
@@ -94,11 +94,11 @@ pub fn solve(input: &str, out: &mut ProblemOutput<'_>) -> anyhow::Result<()> {
 fn parse_input(input: &str) -> anyhow::Result<Input<'_>> {
     let mut sections = input.trim().split("\n\n");
     let mut get_section =
-        move || -> anyhow::Result<&str> { Ok(sections.next().ok_or(NONE_ERR)?.trim()) };
+        move || -> anyhow::Result<&str> { Ok(sections.next().ok_or(NoneErr)?.trim()) };
 
     Ok(Input {
         rules: get_section()?.lines().map(parse_rule).try_collect()?,
-        own_ticket: parse_ticket(get_section()?.lines().next_back().ok_or(NONE_ERR)?)?,
+        own_ticket: parse_ticket(get_section()?.lines().next_back().ok_or(NoneErr)?)?,
         nearby_tickets: get_section()?
             .lines()
             .skip(1)
@@ -108,11 +108,11 @@ fn parse_input(input: &str) -> anyhow::Result<Input<'_>> {
 }
 
 fn parse_rule(line: &str) -> anyhow::Result<(&str, Rule)> {
-    let (field, raw_rule) = line.split_once(':').ok_or(NONE_ERR)?;
+    let (field, raw_rule) = line.split_once(':').ok_or(NoneErr)?;
     let ranges = raw_rule
         .split("or")
         .map(|raw_range| -> anyhow::Result<_> {
-            let (lo, hi) = raw_range.trim().split_once('-').ok_or(NONE_ERR)?;
+            let (lo, hi) = raw_range.trim().split_once('-').ok_or(NoneErr)?;
             Ok(lo.parse()?..=hi.parse()?)
         })
         .try_collect()?;
