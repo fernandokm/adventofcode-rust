@@ -4,20 +4,20 @@ output := 'answers.txt'
 scripts := 'scripts'
 latest := `scripts/get-latest-solution.sh`
 
-dev: build-dev
-  {{bin_dev}} run '{{latest}}'
+dev part='*': build-dev
+  {{bin_dev}} run '{{latest}}:{{part}}'
 
-dev-all: build-dev
-  {{bin_dev}} run '*'
+dev-all part='*': build-dev
+  {{bin_dev}} run '*:{{part}}'
 
 build-dev:
   cargo build
 
-release: build-release
-  {{bin_release}} run '{{latest}}'
+release part='*': build-release
+  {{bin_release}} run '{{latest}}:{{part}}'
 
-release-all: build-release
-  {{bin_release}} run '*'
+release-all part='*': build-release
+  {{bin_release}} run '*:{{part}}'
 
 build-release:
   cargo build --release
@@ -26,15 +26,15 @@ save: build-release
   {{bin_release}} run --quiet '*' > {{output}}
   git --no-pager diff --color=always --unified=2 {{output}} | tail -n+6
 
-bench: build-release
-  {{bin_release}} run '{{latest}}:real' --min-runs 5 --min-duration-s 1 --color=always
+bench part='real': build-release
+  {{bin_release}} run '{{latest}}:{{part}}' --min-runs 5 --min-duration-s 1 --color=always
 
-bench-all: build-release
-  {{bin_release}} run '*:real' --min-runs 5 --min-duration-s 1 --color=always | \
+bench-all part='real': build-release
+  {{bin_release}} run '*:{{part}}' --min-runs 5 --min-duration-s 1 --color=always | \
     {{scripts}}/tee-uncolored.sh bench.txt
 
-flamegraph: build-release
-  cargo flamegraph -- run '{{latest}}:real' --min-runs 5 --min-duration-s 1 --color=always
+flamegraph part='*': build-release
+  cargo flamegraph -- run '{{latest}}:{{part}}' --min-runs 5 --min-duration-s 1 --color=always
   perf script -F +pid > perf.txt
 
 list: build-dev
