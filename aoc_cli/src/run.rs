@@ -210,10 +210,9 @@ impl ProblemFilter {
     pub fn matches_spec(&self, spec: &Spec) -> bool {
         self.day.map_or(true, |day| day == spec.id.day)
             && self.year.map_or(true, |year| year == spec.id.year)
-            && self
-                .variant
-                .as_ref()
-                .map_or(true, |variant| variant == &spec.variant)
+            && self.variant.as_ref().map_or(true, |variant| {
+                variant == &spec.variant || variant == "*"
+            })
     }
 }
 
