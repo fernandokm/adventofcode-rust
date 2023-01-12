@@ -387,6 +387,12 @@ Problem 2022.21 (real)
 Problem 2022.21 (test)
     [part 1] 152
     [part 2] 301
+Problem 2022.22 (real)
+    [part 1] 1428
+    [part 2] 142380
+Problem 2022.22 (test)
+    [part 1] 6032
+    [part 2] 5031
 Problem 2022.25 (real)
     [part 1] 2---1010-0=1220-=010
 Problem 2022.25 (test)
